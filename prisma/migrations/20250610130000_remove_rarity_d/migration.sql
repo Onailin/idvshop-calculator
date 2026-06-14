@@ -1,15 +1,18 @@
--- Migrate existing D rarity items to C before removing the enum value
+-- Migrate D -> C
 UPDATE "Item"
 SET "rarity" = 'C'
-WHERE "rarity" = 'D';
+WHERE "rarity"::text = 'D';
 
--- Recreate Rarity enum without D
+ALTER TABLE "Item" ALTER COLUMN "rarity" DROP DEFAULT;
+
 ALTER TYPE "Rarity" RENAME TO "Rarity_old";
 
-CREATE TYPE "Rarity" AS ENUM ('S+', 'S', 'A', 'B', 'C');
+CREATE TYPE "Rarity" AS ENUM ('NONE', 'S+', 'S', 'A', 'B', 'C');
 
 ALTER TABLE "Item"
 ALTER COLUMN "rarity" TYPE "Rarity"
 USING ("rarity"::text::"Rarity");
 
 DROP TYPE "Rarity_old";
+
+ALTER TABLE "Item" ALTER COLUMN "rarity" SET DEFAULT 'NONE';
