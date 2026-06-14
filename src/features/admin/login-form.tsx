@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn } from "lucide-react";
@@ -15,15 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function LoginForm() {
-  const router = useRouter();
-  const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.replace("/admin");
-    }
-  }, [status, router]);
 
   const {
     register,
@@ -46,7 +37,9 @@ export function LoginForm() {
 
     if (result?.error) {
       if (result.error === "Configuration") {
-        toast.error("ระบบเข้าสู่ระบบยังตั้งค่าไม่ครบ กรุณาตรวจสอบ AUTH_SECRET และ AUTH_URL");
+        toast.error(
+          "ตั้งค่า AUTH_SECRET / AUTH_URL บน Vercel ยังไม่ครบ — ดูที่ /api/health",
+        );
       } else {
         toast.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
       }
@@ -54,13 +47,14 @@ export function LoginForm() {
     }
 
     if (!result?.ok) {
-      toast.error("เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+      toast.error(
+        "เข้าสู่ระบบไม่สำเร็จ — ตรวจ AUTH_SECRET บน Vercel แล้ว redeploy",
+      );
       return;
     }
 
     toast.success("ยินดีต้อนรับกลับ!");
-    router.push("/admin");
-    router.refresh();
+    window.location.assign("/admin");
   }
 
   return (

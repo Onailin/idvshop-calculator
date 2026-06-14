@@ -16,16 +16,19 @@ export function validateProductionEnv(): void {
 
   const errors: string[] = [];
 
-  const authSecret = process.env.AUTH_SECRET?.trim() ?? "";
+  if (!process.env.AUTH_URL?.trim() && !process.env.NEXTAUTH_URL?.trim()) {
+    errors.push("AUTH_URL must be set to your production site URL");
+  }
+
+  const authSecret =
+    process.env.AUTH_SECRET?.trim() ||
+    process.env.NEXTAUTH_SECRET?.trim() ||
+    "";
   if (authSecret.length < 32) {
     errors.push("AUTH_SECRET must be at least 32 characters in production");
   }
   if (PLACEHOLDER_AUTH_SECRETS.has(authSecret)) {
     errors.push("AUTH_SECRET is still using a placeholder value");
-  }
-
-  if (!process.env.AUTH_URL?.trim()) {
-    errors.push("AUTH_URL must be set to your production site URL");
   }
 
   if (!process.env.DATABASE_URL?.trim()) {

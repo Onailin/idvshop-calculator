@@ -1,24 +1,43 @@
-import { PrismaClient } from "@prisma/client";
+import { Pool, neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { neonConfig } from "@neondatabase/serverless";
+import { PrismaClient } from "@prisma/client";
 import ws from "ws";
+
+function isNeonUrl(connectionString?: string): boolean {
+  return Boolean(connectionString?.includes("neon.tech"));
+}
+
+function isPooledNeonUrl(connectionString?: string): boolean {
+  return Boolean(connectionString?.includes("-pooler."));
+}
+
+/** Prefer Neon pooler on serverless — works with the default Prisma TCP driver. */
+export function resolveDatabaseUrl(connectionString?: string): string | undefined {
+  if (!connectionString || !isNeonUrl(connectionString) || isPooledNeonUrl(connectionString)) {
+    return connectionString;
+  }
+
+  if (process.env.VERCEL === "1" || process.env.NODE_ENV === "production") {
+    return connectionString.replace(/(@ep-[^.\/]+)(\.)/, "$1-pooler$2");
+  }
+
+  return connectionString;
+}
 
 function shouldUseNeonAdapter(connectionString?: string): boolean {
   if (process.env.USE_NEON_ADAPTER === "false") {
     return false;
   }
 
-  const isNeonUrl = Boolean(connectionString?.includes("neon.tech"));
-  if (!isNeonUrl) {
+  if (!isNeonUrl(connectionString)) {
     return false;
   }
 
-  if (process.env.USE_NEON_ADAPTER === "true") {
-    return true;
+  if (isPooledNeonUrl(connectionString)) {
+    return false;
   }
 
-  // Serverless hosts (e.g. Vercel) cannot use raw TCP to Neon; use the adapter.
-  return process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+  return process.env.USE_NEON_ADAPTER === "true";
 }
 
 export function getPrismaAdapterMode(connectionString?: string): "neon" | "direct" {
@@ -26,17 +45,19 @@ export function getPrismaAdapterMode(connectionString?: string): "neon" | "direc
 }
 
 export function createPrismaClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = resolveDatabaseUrl(process.env.DATABASE_URL);
 
-  // Opt-in WebSocket adapter for edge/serverless where TCP 5432 is blocked.
-  // Local Node.js should use the default driver (avoids TLS issues with some networks).
   if (connectionString && shouldUseNeonAdapter(connectionString)) {
     neonConfig.webSocketConstructor = ws;
-    const adapter = new PrismaNeon({ connectionString });
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaNeon(pool);
     return new PrismaClient({ adapter });
   }
 
   return new PrismaClient({
+    datasources: connectionString
+      ? { db: { url: connectionString } }
+      : undefined,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
 }
