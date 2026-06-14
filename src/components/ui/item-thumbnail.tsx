@@ -44,6 +44,7 @@ export function ItemThumbnail({
 
   return (
     <div
+      data-item-image
       className={cn("relative shrink-0 overflow-hidden", config.slot, className)}
     >
       {src ? (
@@ -54,10 +55,24 @@ export function ItemThumbnail({
               scale,
             )}
           >
-            <RemoteImage src={src} alt={alt} contain fill sizes={config.sizes} />
+            <RemoteImage
+              src={src}
+              alt={alt}
+              contain
+              fill
+              sizes={config.sizes}
+              loading="eager"
+            />
           </div>
         ) : (
-          <RemoteImage src={src} alt={alt} contain fill sizes={config.sizes} />
+          <RemoteImage
+            src={src}
+            alt={alt}
+            contain
+            fill
+            sizes={config.sizes}
+            loading="eager"
+          />
         )
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-muted/40 text-[10px] text-muted-foreground sm:text-xs">
