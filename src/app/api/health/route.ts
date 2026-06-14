@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthEnvStatus } from "@/lib/auth.config";
+import { getAwsEnvStatus } from "@/lib/aws/aws-env";
+import { getBucketName, getS3Client } from "@/lib/aws/s3-config";
+import { HeadBucketCommand } from "@aws-sdk/client-s3";
 
 export const runtime = "nodejs";
 
@@ -37,13 +40,29 @@ export async function GET(request: NextRequest) {
     dbError = error instanceof Error ? error.message : String(error);
   }
 
+  const aws = getAwsEnvStatus();
+  let s3Ok = false;
+  let s3Error: string | null = null;
+  try {
+    if (aws.accessKeyId && aws.secretAccessKey && aws.region && aws.bucket) {
+      const client = getS3Client();
+      await client.send(new HeadBucketCommand({ Bucket: getBucketName() }));
+      s3Ok = true;
+    } else {
+      s3Error = "AWS env variables incomplete";
+    }
+  } catch (error) {
+    s3Error = error instanceof Error ? error.message : String(error);
+  }
+
   const ok =
     checks.authSecret &&
     checks.databaseUrl &&
     checks.authUrlCorrect &&
     authModuleOk &&
     authProvidersStatus === 200 &&
-    dbOk;
+    dbOk &&
+    s3Ok;
 
   return NextResponse.json({
     ok,
@@ -55,6 +74,9 @@ export async function GET(request: NextRequest) {
       authProvidersBody,
       dbOk,
       dbError,
+      aws,
+      s3Ok,
+      s3Error,
     },
   });
 }

@@ -1,5 +1,6 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { createS3RequestHandler } from "@/lib/aws/s3-http-handler";
+import { sanitizeAwsEnvValue } from "@/lib/aws/aws-env";
 
 export type AwsS3Config = {
   region: string;
@@ -13,7 +14,8 @@ let s3Client: S3Client | null = null;
 
 export function getBucketName(): string {
   const bucketName =
-    process.env.AWS_S3_BUCKET_NAME ?? process.env.AWS_S3_BUCKET;
+    sanitizeAwsEnvValue(process.env.AWS_S3_BUCKET_NAME) ||
+    sanitizeAwsEnvValue(process.env.AWS_S3_BUCKET);
 
   if (!bucketName) {
     throw new Error(
@@ -25,11 +27,11 @@ export function getBucketName(): string {
 }
 
 export function getAwsS3Config(): AwsS3Config {
-  const region = process.env.AWS_REGION;
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const region = sanitizeAwsEnvValue(process.env.AWS_REGION);
+  const accessKeyId = sanitizeAwsEnvValue(process.env.AWS_ACCESS_KEY_ID);
+  const secretAccessKey = sanitizeAwsEnvValue(process.env.AWS_SECRET_ACCESS_KEY);
   const bucketName = getBucketName();
-  const publicUrl = process.env.AWS_S3_PUBLIC_URL;
+  const publicUrl = sanitizeAwsEnvValue(process.env.AWS_S3_PUBLIC_URL) || undefined;
 
   if (!region || !accessKeyId || !secretAccessKey) {
     throw new Error(

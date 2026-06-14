@@ -5,6 +5,10 @@ import {
   isTlsCertificateError,
 } from "@/lib/aws/s3-http-handler";
 import {
+  getAwsSignatureHelpMessage,
+  isAwsSignatureError,
+} from "@/lib/aws/aws-env";
+import {
   formatMaxImageFileSizeMb,
   getMaxImageFileSize,
   isS3UploadFolder,
@@ -73,6 +77,14 @@ export async function POST(request: Request) {
       key: result.key,
     });
   } catch (error) {
+    if (isAwsSignatureError(error)) {
+      console.error("Upload AWS signature error:", error);
+      return NextResponse.json<UploadImageResponse>(
+        { success: false, error: getAwsSignatureHelpMessage() },
+        { status: 403 },
+      );
+    }
+
     if (isTlsCertificateError(error)) {
       return NextResponse.json<UploadImageResponse>(
         { success: false, error: getTlsCertificateHelpMessage() },
