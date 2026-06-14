@@ -96,7 +96,7 @@ export function waitForItemImages(
   return new Promise((resolve) => {
     const tracked = new WeakSet<HTMLImageElement>();
     let observer: MutationObserver | null = null;
-    let interval: ReturnType<typeof setInterval> | null = null;
+    let interval: number | null = null;
 
     const cleanup = () => {
       observer?.disconnect();
