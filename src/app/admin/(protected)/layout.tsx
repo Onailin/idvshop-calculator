@@ -10,7 +10,7 @@ export default async function AdminProtectedLayout({
   const session = await getStaffSession();
 
   if (!session) {
-    redirect("/admin/login");
+    redirect("/login");
   }
 
   return (

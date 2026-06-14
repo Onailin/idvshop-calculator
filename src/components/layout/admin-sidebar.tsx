@@ -90,7 +90,7 @@ export function AdminSidebar({ role, username }: AdminSidebarProps) {
         <Button
           variant="outline"
           className="w-full justify-start border-brand-blush/60 bg-white hover:bg-brand-cream/60"
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          onClick={() => signOut({ callbackUrl: "/login" })}
         >
           <LogOut className="h-4 w-4" />
           ออกจากระบบ

@@ -5,7 +5,7 @@ import { getStaffSession } from "@/lib/auth";
 import { LoginForm } from "@/features/admin/login-form";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
-export default async function AdminLoginPage() {
+export default async function LoginPage() {
   const session = await getStaffSession();
 
   if (session) {

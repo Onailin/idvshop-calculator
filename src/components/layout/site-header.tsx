@@ -119,7 +119,7 @@ export function SiteHeader() {
           <NavLink href="/skins">คำนวณแพ็คสกิน</NavLink>
           <NavLink href="/budget">คำนวณคูปอง</NavLink>
           <Link
-            href="/admin/login"
+            href="/login"
             className={cn("flex items-center gap-2", navLinkClass(isAdmin))}
           >
             <Shield className="h-4 w-4 sm:h-[1.1rem] sm:w-[1.1rem]" />
@@ -181,7 +181,7 @@ export function SiteHeader() {
             คำนวณแพ็กเกจ
           </NavLink>
           <Link
-            href="/admin/login"
+            href="/login"
             className={mobileNavLinkClass(isAdmin)}
             onClick={closeMenu}
           >

@@ -10,7 +10,7 @@ const FOOTER_LINKS = [
   { href: "/", label: "หน้าแรก" },
   { href: "/skins", label: "คำนวณแพ็คสกิน" },
   { href: "/budget", label: "คำนวณคูปอง" },
-  { href: "/admin/login", label: "แอดมิน" },
+  { href: "/login", label: "แอดมิน" },
 ] as const;
 
 type SiteFooterProps = {
