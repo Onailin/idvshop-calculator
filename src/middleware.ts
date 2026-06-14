@@ -1,30 +1,35 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { isStaffRole, isSuperAdmin } from "@/lib/admin-roles";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
-  const { pathname } = req.nextUrl;
-  const role = req.auth?.user?.role;
-  const isStaff = isStaffRole(role);
+const SESSION_COOKIE_NAMES = [
+  "__Secure-authjs.session-token",
+  "authjs.session-token",
+  "__Host-authjs.session-token",
+  "__Secure-next-auth.session-token",
+  "next-auth.session-token",
+] as const;
+
+function hasAuthSession(request: NextRequest): boolean {
+  return SESSION_COOKIE_NAMES.some((name) => request.cookies.has(name));
+}
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
   if (pathname === "/admin/login") {
     return NextResponse.next();
   }
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    if (!isStaff) {
-      const loginUrl = new URL("/admin/login", req.url);
+    if (!hasAuthSession(request)) {
+      const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
-    }
-
-    if (pathname.startsWith("/admin/admins") && !isSuperAdmin(role)) {
-      return NextResponse.redirect(new URL("/admin", req.url));
     }
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/admin", "/admin/:path*"],
