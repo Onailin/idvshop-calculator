@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { LoginForm } from "@/features/admin/login-form";
+import { LoginErrorAlert } from "@/features/admin/login-error-alert";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
 export default function LoginPage() {
@@ -31,6 +33,10 @@ export default function LoginPage() {
         </div>
 
         <LoginForm />
+
+        <Suspense fallback={null}>
+          <LoginErrorAlert />
+        </Suspense>
 
         <p className="text-center">
           <Link
