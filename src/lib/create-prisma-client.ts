@@ -4,11 +4,21 @@ import { neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
 function shouldUseNeonAdapter(connectionString?: string): boolean {
-  if (process.env.USE_NEON_ADAPTER !== "true") {
+  if (process.env.USE_NEON_ADAPTER === "false") {
     return false;
   }
 
-  return Boolean(connectionString?.includes("neon.tech"));
+  const isNeonUrl = Boolean(connectionString?.includes("neon.tech"));
+  if (!isNeonUrl) {
+    return false;
+  }
+
+  if (process.env.USE_NEON_ADAPTER === "true") {
+    return true;
+  }
+
+  // Serverless hosts (e.g. Vercel) cannot use raw TCP to Neon; use the adapter.
+  return process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
 }
 
 export function createPrismaClient(): PrismaClient {

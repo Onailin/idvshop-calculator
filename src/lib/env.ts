@@ -41,7 +41,7 @@ export function validateProductionEnv(): void {
     errors.push("AWS_SECRET_ACCESS_KEY must be configured with real credentials");
   }
 
-  if (!process.env.AWS_S3_BUCKET_NAME?.trim()) {
+  if (!process.env.AWS_S3_BUCKET_NAME?.trim() && !process.env.AWS_S3_BUCKET?.trim()) {
     errors.push("AWS_S3_BUCKET_NAME must be set in production");
   }
 

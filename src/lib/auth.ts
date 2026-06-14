@@ -127,8 +127,13 @@ async function resolveStaffSession(session: Session | null): Promise<Session | n
 }
 
 export async function getStaffSession(): Promise<Session | null> {
-  const session = await auth();
-  return resolveStaffSession(session);
+  try {
+    const session = await auth();
+    return resolveStaffSession(session);
+  } catch (error) {
+    console.error("Session lookup failed:", error);
+    return null;
+  }
 }
 
 export async function requireStaff(): Promise<Session> {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn } from "lucide-react";
@@ -18,16 +18,12 @@ export function LoginForm() {
   const router = useRouter();
   const { status } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const [clearedStaleSession, setClearedStaleSession] = useState(false);
 
   useEffect(() => {
-    if (status !== "authenticated" || clearedStaleSession) {
-      return;
+    if (status === "authenticated") {
+      router.replace("/admin");
     }
-
-    setClearedStaleSession(true);
-    void signOut({ redirect: false });
-  }, [status, clearedStaleSession]);
+  }, [status, router]);
 
   const {
     register,

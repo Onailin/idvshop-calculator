@@ -1,17 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { redirect } from "next/navigation";
-import { getStaffSession } from "@/lib/auth";
 import { LoginForm } from "@/features/admin/login-form";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
-export default async function LoginPage() {
-  const session = await getStaffSession();
-
-  if (session) {
-    redirect("/admin");
-  }
-
+export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4 sm:p-6">
       <div
