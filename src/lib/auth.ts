@@ -1,10 +1,13 @@
 import NextAuth from "next-auth";
 import type { Session } from "next-auth";
-import { authConfig } from "@/lib/auth.config";
+import { authConfig, getAuthSecret } from "@/lib/auth.config";
 import { prisma } from "@/lib/prisma";
 import { isStaffRole } from "@/lib/admin-roles";
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  secret: getAuthSecret(),
+});
 
 async function resolveStaffSession(session: Session | null): Promise<Session | null> {
   if (!session?.user?.id) {
