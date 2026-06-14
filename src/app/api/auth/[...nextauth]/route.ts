@@ -1,6 +1,6 @@
 import { handlers } from "@/lib/auth";
 import { getAuthEnvStatus } from "@/lib/auth.config";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
@@ -15,7 +15,7 @@ function missingAuthEnvResponse() {
   );
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   if (!getAuthEnvStatus().authSecret) {
     return missingAuthEnvResponse();
   }
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   return handlers.GET(request);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   if (!getAuthEnvStatus().authSecret) {
     return missingAuthEnvResponse();
   }
