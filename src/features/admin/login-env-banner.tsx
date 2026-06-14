@@ -6,19 +6,23 @@ export function LoginEnvBanner() {
   }
 
   const env = getAuthEnvStatus();
-  const missing: string[] = [];
+  const issues: string[] = [];
 
   if (!env.authSecret) {
-    missing.push("AUTH_SECRET (อย่างน้อย 32 ตัวอักษร)");
+    issues.push("AUTH_SECRET (อย่างน้อย 32 ตัวอักษร)");
   }
   if (!env.authUrl) {
-    missing.push("AUTH_URL");
+    issues.push("AUTH_URL");
+  } else if (!env.authUrlCorrect) {
+    issues.push(
+      `AUTH_URL ต้องเป็น https://idvshop-calculator-r2dg.vercel.app (ตอนนี้อาจเป็น localhost)`,
+    );
   }
   if (!env.databaseUrl) {
-    missing.push("DATABASE_URL");
+    issues.push("DATABASE_URL");
   }
 
-  if (missing.length === 0) {
+  if (issues.length === 0) {
     return null;
   }
 
@@ -27,15 +31,14 @@ export function LoginEnvBanner() {
       role="alert"
       className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
     >
-      <p className="font-semibold">ยังตั้งค่า Vercel ไม่ครบ — login จะใช้ไม่ได้</p>
-      <p className="mt-1 text-destructive/90">เพิ่ม Environment Variables:</p>
+      <p className="font-semibold">ตั้งค่า Vercel ยังผิด — login จะ error 500</p>
       <ul className="mt-2 list-inside list-disc space-y-0.5">
-        {missing.map((name) => (
-          <li key={name}>{name}</li>
+        {issues.map((issue) => (
+          <li key={issue}>{issue}</li>
         ))}
       </ul>
       <p className="mt-2 text-xs text-destructive/80">
-        Vercel → Settings → Environment Variables → ใส่ค่า → Redeploy
+        Vercel → Settings → Environment Variables → แก้ค่า → Redeploy
       </p>
     </div>
   );

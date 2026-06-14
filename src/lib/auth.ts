@@ -1,8 +1,9 @@
 import NextAuth from "next-auth";
 import type { Session } from "next-auth";
-import { authConfig, getAuthSecret } from "@/lib/auth.config";
-import { prisma } from "@/lib/prisma";
+import { authConfig, ensureAuthEnvForRuntime, getAuthSecret } from "@/lib/auth.config";
 import { isStaffRole } from "@/lib/admin-roles";
+
+ensureAuthEnvForRuntime();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -13,6 +14,8 @@ async function resolveStaffSession(session: Session | null): Promise<Session | n
   if (!session?.user?.id) {
     return null;
   }
+
+  const { prisma } = await import("@/lib/prisma");
 
   let user: { role: string; username: string } | null;
 
