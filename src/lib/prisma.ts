@@ -1,8 +1,8 @@
-import { createPrismaClient } from "@/lib/create-prisma-client";
+import { createPrismaClient, getPrismaAdapterMode } from "@/lib/create-prisma-client";
 
 function getPrismaCacheKey(): string {
-  const adapter = process.env.USE_NEON_ADAPTER === "true" ? "neon" : "direct";
-  return `${adapter}:${process.env.DATABASE_URL ?? ""}`;
+  const connectionString = process.env.DATABASE_URL;
+  return `${getPrismaAdapterMode(connectionString)}:${connectionString ?? ""}`;
 }
 
 const globalForPrisma = globalThis as unknown as {
@@ -22,7 +22,5 @@ if (
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.prismaCacheKey = prismaCacheKey;
-}
+globalForPrisma.prisma = prisma;
+globalForPrisma.prismaCacheKey = prismaCacheKey;

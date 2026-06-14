@@ -45,14 +45,8 @@ export function LoginForm() {
     setIsLoading(false);
 
     if (result?.error) {
-      if (result.error === "RATE_LIMIT") {
-        toast.error("เข้าสู่ระบบผิดพลาดหลายครั้ง กรุณารอ 1 นาทีแล้วลองใหม่");
-      } else if (result.error === "DB_ERROR") {
-        toast.error(
-          "เชื่อมต่อฐานข้อมูลไม่ได้ กรุณาตรวจสอบ DATABASE_URL หรือเปิด Neon แล้วลองใหม่",
-        );
-      } else if (result.error === "Configuration") {
-        toast.error("ระบบเข้าสู่ระบบยังตั้งค่าไม่ครบ กรุณาตรวจสอบ AUTH_SECRET");
+      if (result.error === "Configuration") {
+        toast.error("ระบบเข้าสู่ระบบยังตั้งค่าไม่ครบ กรุณาตรวจสอบ AUTH_SECRET และ AUTH_URL");
       } else {
         toast.error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
       }

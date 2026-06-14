@@ -21,6 +21,10 @@ function shouldUseNeonAdapter(connectionString?: string): boolean {
   return process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
 }
 
+export function getPrismaAdapterMode(connectionString?: string): "neon" | "direct" {
+  return shouldUseNeonAdapter(connectionString) ? "neon" : "direct";
+}
+
 export function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
 

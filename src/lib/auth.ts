@@ -40,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const rateLimitKey = await getLoginRateLimitKey(username);
 
         if (isRateLimited(rateLimitKey)) {
-          throw new Error("RATE_LIMIT");
+          return null;
         }
 
         let user;
@@ -50,7 +50,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
         } catch (error) {
           console.error("Login database error:", error);
-          throw new Error("DB_ERROR");
+          return null;
         }
 
         if (!user || !isStaffRole(user.role)) {
@@ -98,6 +98,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   trustHost: true,
+  secret: process.env.AUTH_SECRET,
 });
 
 async function resolveStaffSession(session: Session | null): Promise<Session | null> {
