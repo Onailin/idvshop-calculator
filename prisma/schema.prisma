@@ -1,0 +1,105 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum ItemType {
+  SKIN
+  ACCESSORY
+  PET
+  FURNITURE
+}
+
+enum Rarity {
+  NONE
+  S_PLUS @map("S+")
+  S
+  A
+  B
+  C
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  items     Item[]
+}
+
+model Item {
+  id            String   @id @default(cuid())
+  name          String
+  type          ItemType
+  rarity        Rarity   @default(NONE)
+  buttonCost    Int
+  sendPrice     Int?
+  topupPrice    Int?
+  preorderPrice Int?
+  imageUrl      String?
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([type])
+  @@index([name])
+}
+
+model PackageGroup {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  isActive  Boolean   @default(true)
+  packages  Package[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Package {
+  id             String       @id @default(cuid())
+  buttons        Int
+  topupAmount    Int?
+  price          Int
+  imageUrl       String?
+  packageGroupId String
+  packageGroup   PackageGroup @relation(fields: [packageGroupId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([packageGroupId])
+  @@index([buttons])
+  @@index([price])
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String?
+  alt       String
+  imageUrl  String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  placement String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
