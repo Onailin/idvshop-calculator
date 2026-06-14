@@ -25,6 +25,28 @@ function countLoadedImages(images: HTMLImageElement[]): number {
   return images.filter((img) => img.complete).length;
 }
 
+function waitForNextPaint(signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+
+    const onAbort = () => {
+      resolve();
+    };
+
+    signal.addEventListener("abort", onAbort, { once: true });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        signal.removeEventListener("abort", onAbort);
+        resolve();
+      });
+    });
+  });
+}
+
 function waitForStableItemImageDom(signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
     const startedAt = Date.now();
@@ -149,6 +171,12 @@ export function waitForItemImages(
       onProgress({ percent: 0, loaded: 0, total: 0, phase: "page" });
 
       await waitForStableItemImageDom(signal);
+
+      if (signal.aborted) {
+        return;
+      }
+
+      await waitForNextPaint(signal);
 
       if (signal.aborted) {
         return;
