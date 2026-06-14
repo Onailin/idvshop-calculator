@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { LoginForm } from "@/features/admin/login-form";
 import { LoginErrorAlert } from "@/features/admin/login-error-alert";
+import { LoginEnvBanner } from "@/features/admin/login-env-banner";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
 export default function LoginPage() {
@@ -31,6 +32,8 @@ export default function LoginPage() {
           </h1>
           <p className="mt-1 text-sm font-medium text-primary">{BRAND_TAGLINE}</p>
         </div>
+
+        <LoginEnvBanner />
 
         <LoginForm />
 
