@@ -1,8 +1,9 @@
+import { TOP_CALCULATOR_RESULTS, clampCalculatorAmount } from "@/lib/calculator-constants";
 import {
   getAffordabilityCheck,
   getBudgetRecommendations,
 } from "@/services/recommendationEngine";
-import { sortByClosestBudgetPriority } from "@/services/packageOptimizer";
+import { sortByBudgetPriority } from "@/services/packageOptimizer";
 import { ALL_GROUPS_FILTER } from "@/types/package";
 import type {
   BudgetCalculatorResult,
@@ -11,8 +12,6 @@ import type {
   PackageInput,
   SkinBudgetCheckResult,
 } from "@/types/package";
-
-const TOP_RESULTS = 3;
 
 export function budgetCalculator(
   budget: number,
@@ -23,9 +22,14 @@ export function budgetCalculator(
     return [];
   }
 
-  const { combinations } = getBudgetRecommendations(budget, packages, groupFilter);
+  const safeBudget = clampCalculatorAmount(budget);
+  if (safeBudget <= 0) {
+    return [];
+  }
 
-  return sortByClosestBudgetPriority(combinations, budget).slice(0, TOP_RESULTS);
+  const { combinations } = getBudgetRecommendations(safeBudget, packages, groupFilter);
+
+  return sortByBudgetPriority(combinations).slice(0, TOP_CALCULATOR_RESULTS);
 }
 
 export function calculateBudgetCombinations(

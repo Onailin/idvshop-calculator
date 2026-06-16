@@ -1,8 +1,11 @@
+import { TOP_CALCULATOR_RESULTS, clampCalculatorAmount } from "@/lib/calculator-constants";
 import { getTopupRecommendations } from "@/services/recommendationEngine";
+import {
+  pickTopUniqueCombinations,
+  sortByTopupRequirementPriority,
+} from "@/services/packageOptimizer";
 import { ALL_GROUPS_FILTER } from "@/types/package";
 import type { PackageCombination, PackageGroupFilter, PackageInput } from "@/types/package";
-
-const TOP_RESULTS = 3;
 
 export function topupCalculator(
   requiredTopup: number,
@@ -13,11 +16,20 @@ export function topupCalculator(
     return [];
   }
 
+  const safeTopup = clampCalculatorAmount(requiredTopup);
+  if (safeTopup <= 0) {
+    return [];
+  }
+
   const { combinations } = getTopupRecommendations(
-    requiredTopup,
+    safeTopup,
     packages,
     groupFilter,
   );
 
-  return combinations.slice(0, TOP_RESULTS);
+  return pickTopUniqueCombinations(
+    combinations,
+    TOP_CALCULATOR_RESULTS,
+    sortByTopupRequirementPriority,
+  );
 }

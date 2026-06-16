@@ -8,6 +8,11 @@ import type {
   SelectedPackageEntry,
 } from "@/types/discount";
 import type { PackageInput } from "@/types/package";
+import {
+  findRegularPackageGroupName,
+  isCouponPackageGroupName,
+  isPreorderPackageGroupName,
+} from "@/lib/package-group-default";
 
 type DiscountGroupNames = {
   regular: string;
@@ -97,20 +102,12 @@ type CouponAssignment = {
   savings: number;
 };
 
-function isPreorderGroupName(name: string): boolean {
-  return /pre-?order/i.test(name) || /พรีออเดอร์/i.test(name);
-}
-
 function isDiscount10GroupName(name: string): boolean {
-  return name.includes("10%");
+  return isCouponPackageGroupName(name) && name.includes("10%");
 }
 
 function isDiscount3GroupName(name: string): boolean {
-  return name.includes("3%") && !name.includes("10%");
-}
-
-function isRegularGroupName(name: string): boolean {
-  return /regular/i.test(name) || /ธรรมดา/.test(name);
+  return isCouponPackageGroupName(name) && !name.includes("10%");
 }
 
 export function discoverDiscountGroups(
@@ -119,19 +116,8 @@ export function discoverDiscountGroups(
   const groupNames = [...new Set(packages.map((pkg) => pkg.groupName))];
   const discount10 = groupNames.find(isDiscount10GroupName);
   const discount3 = groupNames.find(isDiscount3GroupName);
-  const preorder = groupNames.find(isPreorderGroupName);
-
-  const regular =
-    groupNames.find(isRegularGroupName) ??
-    groupNames.find(
-      (name) =>
-        name !== discount3 &&
-        name !== discount10 &&
-        name !== preorder &&
-        !isDiscount3GroupName(name) &&
-        !isDiscount10GroupName(name) &&
-        !isPreorderGroupName(name),
-    );
+  const preorder = groupNames.find(isPreorderPackageGroupName);
+  const regular = findRegularPackageGroupName(packages);
 
   if (!regular) {
     return null;
@@ -391,13 +377,42 @@ export function getRegularPackagesForSelection(
     return [];
   }
 
-  return packages
-    .filter((pkg) => pkg.groupName === groups.regular)
-    .filter((pkg) => {
-      const tierPrices = getPackageTierPrices(packages, pkg);
-      return tierPrices.discount3 !== null || tierPrices.discount10 !== null;
-    })
-    .sort((a, b) => b.buttons - a.buttons);
+  const couponGroupNames = new Set(
+    [groups.discount3, groups.discount10].filter(
+      (name) => name !== groups.regular,
+    ),
+  );
+
+  const couponPackages = packages.filter((pkg) =>
+    couponGroupNames.has(pkg.groupName),
+  );
+
+  if (couponPackages.length === 0) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const result: PackageInput[] = [];
+
+  for (const couponPkg of couponPackages) {
+    const topup = getTopupValue(couponPkg);
+    const key = `${couponPkg.buttons}:${topup}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+
+    const regularPkg = packages.find(
+      (pkg) =>
+        pkg.groupName === groups.regular &&
+        pkg.buttons === couponPkg.buttons &&
+        getTopupValue(pkg) === topup,
+    );
+
+    result.push(regularPkg ?? couponPkg);
+  }
+
+  return result.sort((a, b) => b.buttons - a.buttons);
 }
 
 export function calculateOptimalCouponAllocation(

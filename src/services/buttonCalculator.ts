@@ -1,9 +1,8 @@
+import { TOP_CALCULATOR_RESULTS, clampCalculatorAmount } from "@/lib/calculator-constants";
 import { getSkinRecommendations } from "@/services/recommendationEngine";
-import { pickTopSkinRecommendations } from "@/services/packageOptimizer";
+import { pickTopUniqueCombinations } from "@/services/packageOptimizer";
 import { ALL_GROUPS_FILTER } from "@/types/package";
 import type { PackageCombination, PackageGroupFilter, PackageInput } from "@/types/package";
-
-const TOP_RESULTS = 3;
 
 export function buttonCalculator(
   requiredButtons: number,
@@ -14,11 +13,16 @@ export function buttonCalculator(
     return [];
   }
 
+  const safeButtons = clampCalculatorAmount(requiredButtons);
+  if (safeButtons <= 0) {
+    return [];
+  }
+
   const { combinations } = getSkinRecommendations(
-    requiredButtons,
+    safeButtons,
     packages,
     groupFilter,
   );
 
-  return pickTopSkinRecommendations(combinations, TOP_RESULTS);
+  return pickTopUniqueCombinations(combinations, TOP_CALCULATOR_RESULTS);
 }

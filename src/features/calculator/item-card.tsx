@@ -2,11 +2,11 @@
 
 import { ItemThumbnail } from "@/components/ui/item-thumbnail";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { isGachaMarbleItem } from "@/lib/gacha-marble-item";
 import { formatRarity, RARITY_COLORS } from "@/lib/rarity";
-import { formatBahtInt } from "@/lib/utils";
+import { cn, formatBahtInt } from "@/lib/utils";
 import { ButtonAmount } from "@/components/ui/button-amount";
 import type { CalculatorItem } from "@/types";
 
@@ -18,14 +18,29 @@ type ItemCardProps = {
 
 export function ItemCard({ item, selected, onToggle }: ItemCardProps) {
   const compactImage = isGachaMarbleItem(item);
+  const toggleLabel = selected
+    ? `เอา ${item.name} ออกจากรายการคำนวณ`
+    : `เพิ่ม ${item.name} ในรายการคำนวณ`;
 
   return (
     <Card
-      className={`min-w-0 overflow-hidden transition-all hover:shadow-md ${
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      aria-label={toggleLabel}
+      onClick={() => onToggle(item.id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onToggle(item.id);
+        }
+      }}
+      className={cn(
+        "min-w-0 cursor-pointer overflow-hidden transition-all hover:shadow-md",
         selected
           ? "ring-2 ring-primary border-brand-rose/40 bg-brand-blush/20"
-          : "border-brand-blush/50"
-      }`}
+          : "border-brand-blush/50",
+      )}
     >
       <CardContent className="p-0">
         <div
@@ -82,21 +97,18 @@ export function ItemCard({ item, selected, onToggle }: ItemCardProps) {
             </div>
 
             <div className="mt-1.5 flex justify-end">
-              <Button
-                type="button"
-                size="sm"
-                variant={selected ? "default" : "outline"}
-                className="h-7 rounded-full px-3 text-[11px] font-medium leading-none"
-                onClick={() => onToggle(item.id)}
-                aria-pressed={selected}
-                aria-label={
-                  selected
-                    ? `เอา ${item.name} ออกจากรายการคำนวณ`
-                    : `เพิ่ม ${item.name} ในรายการคำนวณ`
-                }
+              <span
+                aria-hidden="true"
+                className={cn(
+                  buttonVariants({
+                    size: "sm",
+                    variant: selected ? "default" : "outline",
+                  }),
+                  "pointer-events-none h-7 rounded-full px-3 text-[11px] font-medium leading-none",
+                )}
               >
                 คำนวณ
-              </Button>
+              </span>
             </div>
           </div>
         </div>

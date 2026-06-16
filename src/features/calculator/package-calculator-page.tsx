@@ -16,6 +16,10 @@ import {
 import { PriceWithDiscount } from "@/features/calculator/price-with-discount";
 import { CalculatorCombinationCard } from "@/features/calculator/calculator-combination-card";
 import { QuantityStepper } from "@/features/calculator/quantity-stepper";
+import {
+  sanitizeCalculatorAmountInput,
+  TOP_CALCULATOR_RESULTS,
+} from "@/lib/calculator-constants";
 import { NoPackagesMessage, parseAmount } from "@/features/calculator/package-result-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,19 +34,79 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ButtonAmount } from "@/components/ui/button-amount";
+import {
+  type CalculatorPricingMode,
+  findPreorderPackageGroupId,
+  findRegularPackageGroupId,
+  getCalculatorPricingGroups,
+  resolveCalculatorPricingGroupId,
+} from "@/lib/package-group-default";
 import { cn, formatBahtInt, formatButtons } from "@/lib/utils";
 import type {
   CouponAllocationResult,
   GlobalCouponInventory,
   SelectedPackageEntry,
 } from "@/types/discount";
-import type { PackageCombination, PackageInput } from "@/types/package";
+import type {
+  PackageCombination,
+  PackageGroupOption,
+  PackageInput,
+} from "@/types/package";
 
 type CalculatorMode = "budget" | "buttons" | "topup" | "coupon";
 
 type PackageCalculatorPageProps = {
   packages: PackageInput[];
+  packageGroups: PackageGroupOption[];
 };
+
+const PRICING_MODE_OPTIONS: Array<{
+  id: CalculatorPricingMode;
+  label: string;
+}> = [
+  { id: "regular", label: "เติมแบบปกติ" },
+  { id: "preorder", label: "พรีออเดอร์" },
+];
+
+function PricingModeSelect({
+  value,
+  onChange,
+  hasPreorder,
+}: {
+  value: CalculatorPricingMode;
+  onChange: (value: CalculatorPricingMode) => void;
+  hasPreorder: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>ประเภทราคา</Label>
+      <div className="grid grid-cols-2 gap-2 sm:max-w-md">
+        {PRICING_MODE_OPTIONS.map((option) => {
+          const isActive = value === option.id;
+          const isDisabled = option.id === "preorder" && !hasPreorder;
+
+          return (
+            <button
+              key={option.id}
+              type="button"
+              disabled={isDisabled}
+              onClick={() => onChange(option.id)}
+              className={cn(
+                "rounded-xl border px-4 py-3 text-sm font-medium transition-colors",
+                isActive
+                  ? "border-brand-rose bg-primary text-primary-foreground shadow-sm"
+                  : "border-brand-blush bg-card text-foreground hover:bg-brand-blush/40",
+                isDisabled && "cursor-not-allowed opacity-50",
+              )}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const TABS: Array<{
   id: CalculatorMode;
@@ -69,9 +133,6 @@ type AmountTabProps = {
   isCalculating?: boolean;
 };
 
-function sanitizeNumericInput(value: string): string {
-  return value.replace(/[^\d]/g, "");
-}
 
 function AmountCalculatorTab({
   id,
@@ -104,7 +165,7 @@ function AmountCalculatorTab({
                 placeholder={placeholder}
                 value={value}
                 onChange={(event) =>
-                  onChange(sanitizeNumericInput(event.target.value))
+                  onChange(sanitizeCalculatorAmountInput(event.target.value))
                 }
                 className="flex-1"
               />
@@ -121,7 +182,7 @@ function AmountCalculatorTab({
       {amount > 0 && (
         <section className="space-y-3">
           <h3 className="text-sm font-semibold">
-            ผลลัพธ์ที่แนะนำ (Top 3)
+            ผลลัพธ์ที่แนะนำ (Top 4)
             {isCalculating && (
               <span className="ml-2 font-normal text-muted-foreground">
                 · กำลังคำนวณ...
@@ -131,7 +192,7 @@ function AmountCalculatorTab({
           {results.length === 0 ? (
             <p className="text-sm text-muted-foreground">{emptyMessage}</p>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {results.map((combination, index) => (
                 <CalculatorCombinationCard
                   key={`${combination.groupId}-${index}`}
@@ -267,18 +328,16 @@ function CouponCalculatorTab({ packages }: { packages: PackageInput[] }) {
       <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">วิธีใช้กับหลายแพ็กเกจ</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
-          <li>เพิ่มแพ็กเกจได้หลายรายการ เช่น 759 × 3 และ 335 × 2</li>
-          <li>กฎ: <strong>1 คูปองต่อ 1 แพ็กเกจ</strong> — แพ็กเกจหนึ่งใช้ได้แค่คูปองเดียว</li>
-          <li>
-            ระบบเลือกแพ็กที่<strong>ลดได้มากที่สุด</strong>ก่อน (มักเป็นแพ็กใหญ่)
-            แล้วจัดสรรคูปอง 10% / 3% ให้คุ้มที่สุด
-          </li>
-          <li>
-            แพ็กราคาปกติ (เช่น 335, 759) ใช้<strong>ราคาปกติจากฐานข้อมูล</strong> — ไม่ต้องใช้คูปอง
-          </li>
-          <li>
-            แพ็กที่มีเฉพาะราคาคูปอง 3% / 10% ต้อง<strong>เลือกคูปองให้ครบทุกแพ็ก</strong>
-          </li>
+          <li>1. เลือกแพ็กเกจที่ลูกค้าต้องการเติม</li>
+          <li>2. กดเพิ่มแพ็กเกจ</li>
+          <li>3. กดเลือกจำนวนคูปองทั้งหมดที่ลูกค้ามี</li>
+          <li>4. กดคำนวณการจัดสรรคูปอง</li>
+
+          <hr/>
+          <li>  คูปอง 1 ใบ ใช้ได้เพียง 1 แพ็ก</li>
+          <li>  หากจะเลือกเติมเฉพาะแพ็ก 2,227 3,663 และ 7,249 กระดุม ต้องกดจำนวนคูปองให้ครบตามจำนวนแพ็ก หากกดจำนวนคูปองไม่ครบ ระบบจะไม่คำนวณให้</li>
+          <li>  หากมีจำนวนคูปองน้อยกว่าจำนวนแพ็กเกจที่เลือก ระบบจะเลือกใช้คูปองกับแพ็กที่ลดราคาได้มากที่สุดก่อน</li>
+          <li>  ตัวอย่าง : ต้องการเติม 759+335+2,227 (3แพ็ก) แต่มีคูปองเพียง 2 ใบ ระบบจะลดราคาให้เพียง 2 แพ็กที่คุ้มที่สุด ส่วนอีก 1 แพ็กจะเป็นราคาเต็ม</li>
         </ul>
       </div>
 
@@ -540,11 +599,28 @@ function CouponCalculatorTab({ packages }: { packages: PackageInput[] }) {
   );
 }
 
-export function PackageCalculatorPage({ packages }: PackageCalculatorPageProps) {
+export function PackageCalculatorPage({
+  packages,
+  packageGroups,
+}: PackageCalculatorPageProps) {
   const [activeTab, setActiveTab] = useState<CalculatorMode>("budget");
+  const [pricingMode, setPricingMode] =
+    useState<CalculatorPricingMode>("regular");
   const [budgetInput, setBudgetInput] = useState("");
   const [buttonsInput, setButtonsInput] = useState("");
   const [topupInput, setTopupInput] = useState("");
+
+  const pricingGroups = useMemo(
+    () => getCalculatorPricingGroups(packageGroups),
+    [packageGroups],
+  );
+  const pricingGroupId = useMemo(
+    () => resolveCalculatorPricingGroupId(pricingGroups, pricingMode),
+    [pricingGroups, pricingMode],
+  );
+  const hasPreorder = Boolean(findPreorderPackageGroupId(pricingGroups));
+  const hasRegular = Boolean(findRegularPackageGroupId(pricingGroups));
+  const pricingGroupFilter = pricingGroupId ?? "__none__";
 
   const deferredBudgetInput = useDeferredValue(budgetInput);
   const deferredButtonsInput = useDeferredValue(buttonsInput);
@@ -558,18 +634,24 @@ export function PackageCalculatorPage({ packages }: PackageCalculatorPageProps) 
   const isButtonsCalculating = deferredButtonsInput !== buttonsInput;
   const isTopupCalculating = deferredTopupInput !== topupInput;
 
-  const budgetResults = useMemo(
-    () => budgetCalculator(budgetAmount, packages),
-    [budgetAmount, packages],
-  );
-  const buttonResults = useMemo(
-    () => buttonCalculator(buttonsAmount, packages),
-    [buttonsAmount, packages],
-  );
-  const topupResults = useMemo(
-    () => topupCalculator(topupAmount, packages),
-    [topupAmount, packages],
-  );
+  const budgetResults = useMemo(() => {
+    if (!pricingGroupId) {
+      return [];
+    }
+    return budgetCalculator(budgetAmount, packages, pricingGroupFilter);
+  }, [budgetAmount, packages, pricingGroupFilter, pricingGroupId]);
+  const buttonResults = useMemo(() => {
+    if (!pricingGroupId) {
+      return [];
+    }
+    return buttonCalculator(buttonsAmount, packages, pricingGroupFilter);
+  }, [buttonsAmount, packages, pricingGroupFilter, pricingGroupId]);
+  const topupResults = useMemo(() => {
+    if (!pricingGroupId) {
+      return [];
+    }
+    return topupCalculator(topupAmount, packages, pricingGroupFilter);
+  }, [topupAmount, packages, pricingGroupFilter, pricingGroupId]);
 
   if (packages.length === 0) {
     return <NoPackagesMessage />;
@@ -603,7 +685,21 @@ export function PackageCalculatorPage({ packages }: PackageCalculatorPageProps) 
         })}
       </nav>
 
+      {activeTab !== "coupon" && (
+        <PricingModeSelect
+          value={pricingMode}
+          onChange={setPricingMode}
+          hasPreorder={hasPreorder}
+        />
+      )}
+
       <div>
+        {activeTab !== "coupon" && !hasRegular && (
+          <p className="mb-4 text-sm text-destructive">
+            ไม่พบกลุ่มแพ็กเกจเติมแบบปกติ — กรุณาตั้งค่าในแอดมิน
+          </p>
+        )}
+
         {activeTab === "budget" && (
           <AmountCalculatorTab
             id="budget-amount"

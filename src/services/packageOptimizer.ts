@@ -8,6 +8,7 @@ const MAX_COMBINATIONS = 50;
 const REQUIREMENT_CANDIDATE_LIMIT = 30;
 const FULL_ENUMERATION_MAX_BUTTONS = 2000;
 const FULL_ENUMERATION_MAX_BUDGET = 2000;
+const MAX_TOPUP_DP_TARGET = 100_000;
 
 type GenerateOptions = {
   minButtons?: number;
@@ -52,6 +53,46 @@ function getMaxButtons(packages: PackageInput[], requiredButtons: number): numbe
   }
   const maxPackageButtons = Math.max(...packages.map((pkg) => pkg.buttons));
   return requiredButtons + maxPackageButtons;
+}
+
+function getMaxButtonsForTopup(
+  packages: PackageInput[],
+  requiredTopup: number,
+): number {
+  if (packages.length === 0) {
+    return requiredTopup;
+  }
+
+  const maxPackageButtons = Math.max(...packages.map((pkg) => pkg.buttons));
+  const positiveTopups = packages.map(getPackageTopup).filter((topup) => topup > 0);
+  if (positiveTopups.length === 0) {
+    return FULL_ENUMERATION_MAX_BUTTONS;
+  }
+
+  const smallestTopup = Math.min(...positiveTopups);
+  const packsNeeded = Math.ceil(requiredTopup / smallestTopup);
+
+  return packsNeeded * maxPackageButtons + maxPackageButtons;
+}
+
+function getMaxPriceForTopup(
+  packages: PackageInput[],
+  requiredTopup: number,
+): number {
+  if (packages.length === 0) {
+    return 0;
+  }
+
+  const cheapest = [...packages].sort((a, b) => a.price - b.price)[0];
+  const positiveTopups = packages.map(getPackageTopup).filter((topup) => topup > 0);
+  if (positiveTopups.length === 0) {
+    return cheapest.price * 24;
+  }
+
+  const smallestTopup = Math.min(...positiveTopups);
+  const packsNeeded = Math.ceil(requiredTopup / smallestTopup);
+
+  return packsNeeded * cheapest.price * 2 + 2_000;
 }
 
 function buildCombination(
@@ -297,6 +338,94 @@ export function findOptimalTopupCombination(
   return best;
 }
 
+export function findTopTopupCombinations(
+  packages: PackageInput[],
+  requiredTopup: number,
+  groupId: string,
+  groupName: string,
+  limit: number = 3,
+): PackageCombination[] {
+  if (
+    packages.length === 0 ||
+    requiredTopup <= 0 ||
+    limit <= 0 ||
+    requiredTopup > MAX_TOPUP_DP_TARGET
+  ) {
+    return [];
+  }
+
+  const sortedPackages = [...packages].sort(
+    (a, b) => getPackageTopup(a) - getPackageTopup(b),
+  );
+  const maxPackageTopup = Math.max(...sortedPackages.map(getPackageTopup));
+  const maxTopup = requiredTopup + maxPackageTopup;
+  const dp: (DpEntry | null)[] = Array.from({ length: maxTopup + 1 }, () => null);
+  dp[0] = { cost: 0, counts: Array(sortedPackages.length).fill(0) };
+
+  for (let topup = 1; topup <= maxTopup; topup++) {
+    for (let index = 0; index < sortedPackages.length; index++) {
+      const pkg = sortedPackages[index];
+      const pkgTopup = getPackageTopup(pkg);
+      if (topup < pkgTopup) {
+        continue;
+      }
+
+      const previous = dp[topup - pkgTopup];
+      if (!previous) {
+        continue;
+      }
+
+      const candidate: DpEntry = {
+        cost: previous.cost + pkg.price,
+        counts: [...previous.counts],
+      };
+      candidate.counts[index]++;
+
+      const existing = dp[topup];
+      if (!existing || candidate.cost < existing.cost) {
+        dp[topup] = candidate;
+        continue;
+      }
+
+      if (
+        candidate.cost === existing.cost &&
+        shouldReplaceTopupDpEntry(sortedPackages, candidate, existing, groupId, groupName)
+      ) {
+        dp[topup] = candidate;
+      }
+    }
+  }
+
+  const candidates: PackageCombination[] = [];
+  const seen = new Set<string>();
+
+  for (let topup = requiredTopup; topup <= maxTopup; topup++) {
+    const entry = dp[topup];
+    if (!entry) {
+      continue;
+    }
+
+    const combination = buildCombinationFromCounts(
+      sortedPackages,
+      entry.counts,
+      0,
+      groupId,
+      groupName,
+    );
+
+    const key = combinationKey(combination);
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    candidates.push(combination);
+  }
+
+  candidates.sort(compareTopupRequirementPriority);
+  return candidates.slice(0, limit);
+}
+
 export function findTopRequirementCombinations(
   packages: PackageInput[],
   requiredButtons: number,
@@ -494,6 +623,101 @@ export function findOptimalBudgetCombination(
   return best;
 }
 
+export function findTopBudgetCombinations(
+  packages: PackageInput[],
+  budget: number,
+  groupId: string,
+  groupName: string,
+  limit: number = 3,
+): PackageCombination[] {
+  if (packages.length === 0 || budget <= 0 || limit <= 0) {
+    return [];
+  }
+
+  const sortedPackages = [...packages].sort((a, b) => a.buttons - b.buttons);
+  const dp: (DpEntry | null)[] = Array.from({ length: budget + 1 }, () => null);
+  dp[0] = { cost: 0, counts: Array(sortedPackages.length).fill(0) };
+
+  for (let price = 1; price <= budget; price++) {
+    for (let index = 0; index < sortedPackages.length; index++) {
+      const pkg = sortedPackages[index];
+      if (price < pkg.price) {
+        continue;
+      }
+
+      const previous = dp[price - pkg.price];
+      if (!previous) {
+        continue;
+      }
+
+      const candidate: DpEntry = {
+        cost: price,
+        counts: [...previous.counts],
+      };
+      candidate.counts[index]++;
+
+      const existing = dp[price];
+      if (!existing) {
+        dp[price] = candidate;
+        continue;
+      }
+
+      const candidateButtons = buildCombinationFromCounts(
+        sortedPackages,
+        candidate.counts,
+        0,
+        groupId,
+        groupName,
+        budget,
+      ).totalButtons;
+      const existingButtons = buildCombinationFromCounts(
+        sortedPackages,
+        existing.counts,
+        0,
+        groupId,
+        groupName,
+        budget,
+      ).totalButtons;
+
+      if (
+        candidateButtons > existingButtons ||
+        (candidateButtons === existingButtons && price < existing.cost)
+      ) {
+        dp[price] = candidate;
+      }
+    }
+  }
+
+  const candidates: PackageCombination[] = [];
+  const seen = new Set<string>();
+
+  for (let price = 1; price <= budget; price++) {
+    const entry = dp[price];
+    if (!entry) {
+      continue;
+    }
+
+    const combination = buildCombinationFromCounts(
+      sortedPackages,
+      entry.counts,
+      0,
+      groupId,
+      groupName,
+      budget,
+    );
+
+    const key = combinationKey(combination);
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    candidates.push(combination);
+  }
+
+  return sortByBudgetPriority(candidates).slice(0, limit);
+}
+
 function combinationKey(combination: PackageCombination): string {
   return `${combination.groupId}|${combination.items
     .map((item) => `${item.packageId}:${item.quantity}`)
@@ -538,6 +762,34 @@ export function pickTopSkinRecommendations(
   return picked;
 }
 
+export function pickTopUniqueCombinations(
+  combinations: PackageCombination[],
+  limit: number,
+  sortFn: (
+    combos: PackageCombination[],
+  ) => PackageCombination[] = sortByRequirementPriority,
+): PackageCombination[] {
+  const sorted = sortFn(combinations);
+  const picked: PackageCombination[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const combination of sorted) {
+    if (picked.length >= limit) {
+      break;
+    }
+
+    const key = combinationKey(combination);
+    if (seenKeys.has(key)) {
+      continue;
+    }
+
+    seenKeys.add(key);
+    picked.push(combination);
+  }
+
+  return picked;
+}
+
 export function generateCombinations(
   packages: PackageInput[],
   options: GenerateOptions,
@@ -553,8 +805,14 @@ export function generateCombinations(
     options.maxButtons ??
     (options.minButtons !== undefined
       ? getMaxButtons(sortedPackages, requiredButtons)
+      : options.minTopup !== undefined
+        ? getMaxButtonsForTopup(sortedPackages, options.minTopup)
+        : FULL_ENUMERATION_MAX_BUTTONS);
+  const maxPrice =
+    options.maxPrice ??
+    (options.minTopup !== undefined
+      ? getMaxPriceForTopup(sortedPackages, options.minTopup)
       : Number.MAX_SAFE_INTEGER);
-  const maxPrice = options.maxPrice ?? Number.MAX_SAFE_INTEGER;
   const includeEmpty = options.includeEmpty ?? false;
   const maxResults = options.maxResults ?? MAX_COMBINATIONS;
 
@@ -628,7 +886,9 @@ export function generateCombinations(
       Math.floor((maxPrice - totalPrice) / pkg.price),
       requiredButtons > 0
         ? Math.ceil((requiredButtons + maxPackageButtons) / pkg.buttons)
-        : Math.floor(maxPrice / pkg.price),
+        : options.minTopup !== undefined
+          ? Math.ceil(getMaxButtonsForTopup(sortedPackages, options.minTopup) / pkg.buttons)
+          : 24,
     );
 
     for (let quantity = maxQuantity; quantity >= 0; quantity -= 1) {

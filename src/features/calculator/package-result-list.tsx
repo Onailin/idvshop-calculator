@@ -2,10 +2,11 @@
 
 import type { ReactNode } from "react";
 import { PackageBillCard } from "@/features/calculator/package-bill-card";
+import { TOP_CALCULATOR_RESULTS } from "@/lib/calculator-constants";
 import { pickTopSkinRecommendations } from "@/services/packageOptimizer";
 import type { PackageCombination } from "@/types/package";
 
-export const TOP_RESULTS = 3;
+export { TOP_CALCULATOR_RESULTS as TOP_RESULTS };
 
 export function parseAmount(value: string): number {
   const amount = Number(value);
@@ -27,7 +28,7 @@ export function PackageResultList({
   requiredButtons,
   showRemainingBudget = false,
 }: PackageResultListProps) {
-  const top = pickTopSkinRecommendations(combinations, TOP_RESULTS);
+  const top = pickTopSkinRecommendations(combinations, TOP_CALCULATOR_RESULTS);
 
   if (top.length === 0) {
     return (
@@ -52,9 +53,9 @@ export function PackageResultList({
           />
         ))}
       </div>
-      {combinations.length > TOP_RESULTS && (
+      {combinations.length > TOP_CALCULATOR_RESULTS && (
         <p className="text-xs text-muted-foreground">
-          แสดง {TOP_RESULTS} รายการแรกจากทั้งหมด {combinations.length} ชุด
+          แสดง {TOP_CALCULATOR_RESULTS} รายการแรกจากทั้งหมด {combinations.length} ชุด
         </p>
       )}
     </section>

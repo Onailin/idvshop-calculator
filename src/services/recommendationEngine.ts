@@ -1,8 +1,9 @@
+import { MAX_CALCULATOR_AMOUNT } from "@/lib/calculator-constants";
 import {
   findOptimalRequirementCombination,
   findTopRequirementCombinations,
-  findOptimalBudgetCombination,
-  findOptimalTopupCombination,
+  findTopBudgetCombinations,
+  findTopTopupCombinations,
   generateCombinations,
   groupPackagesByGroup,
   PACKAGE_OPTIMIZER_LIMITS,
@@ -75,6 +76,14 @@ function generateRequirementCombinations(
       PACKAGE_OPTIMIZER_LIMITS.requirementCandidateLimit,
     );
     allCombinations.push(...topCombinations);
+
+    const enumerated = generateCombinations(group.packages, {
+      groupId: group.groupId,
+      groupName: group.groupName,
+      minButtons: requiredButtons,
+      maxResults: PACKAGE_OPTIMIZER_LIMITS.maxCombinations,
+    });
+    allCombinations.push(...enumerated);
   }
 
   return dedupeCombinations(allCombinations);
@@ -84,17 +93,17 @@ function generateBudgetCombinations(grouped: GroupedPackages, budget: number) {
   const shouldEnumerate =
     budget <= PACKAGE_OPTIMIZER_LIMITS.fullEnumerationMaxBudget;
   const allCombinations: PackageCombination[] = [];
+  const candidateLimit = PACKAGE_OPTIMIZER_LIMITS.requirementCandidateLimit;
 
   for (const group of grouped.values()) {
-    const optimal = findOptimalBudgetCombination(
+    const topCombinations = findTopBudgetCombinations(
       group.packages,
       budget,
       group.groupId,
       group.groupName,
+      candidateLimit,
     );
-    if (optimal) {
-      allCombinations.push(optimal);
-    }
+    allCombinations.push(...topCombinations);
 
     if (!shouldEnumerate) {
       continue;
@@ -113,18 +122,30 @@ function generateBudgetCombinations(grouped: GroupedPackages, budget: number) {
 }
 
 function generateTopupCombinations(grouped: GroupedPackages, requiredTopup: number) {
+  if (requiredTopup > MAX_CALCULATOR_AMOUNT) {
+    return [];
+  }
+
   const allCombinations: PackageCombination[] = [];
+  const candidateLimit = PACKAGE_OPTIMIZER_LIMITS.requirementCandidateLimit;
 
   for (const group of grouped.values()) {
-    const optimal = findOptimalTopupCombination(
+    const topCombinations = findTopTopupCombinations(
       group.packages,
       requiredTopup,
       group.groupId,
       group.groupName,
+      candidateLimit,
     );
-    if (optimal) {
-      allCombinations.push(optimal);
-    }
+    allCombinations.push(...topCombinations);
+
+    const enumerated = generateCombinations(group.packages, {
+      groupId: group.groupId,
+      groupName: group.groupName,
+      minTopup: requiredTopup,
+      maxResults: PACKAGE_OPTIMIZER_LIMITS.maxCombinations,
+    });
+    allCombinations.push(...enumerated);
   }
 
   return dedupeCombinations(allCombinations);
