@@ -51,7 +51,7 @@ export function ItemCard({ item, selected, onToggle }: ItemCardProps) {
           }
         >
           {compactImage ? (
-            <div className="flex w-28 shrink-0 items-center justify-center p-2 sm:w-32 sm:p-2.5 lg:w-36">
+            <div className="flex w-28 shrink-0 items-center justify-start sm:w-32 lg:w-36">
               <ItemThumbnail
                 src={item.imageUrl}
                 alt={item.name}

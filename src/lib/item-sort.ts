@@ -12,7 +12,7 @@ function isAccessoryCategory(item: CalculatorItem): boolean {
 }
 
 function isSRarity(rarity: Rarity): boolean {
-  return rarity === "S" || rarity === "S_PLUS";
+  return rarity === "S" || rarity === "SS";
 }
 
 function getCalculatorItemSortTier(item: CalculatorItem): number {

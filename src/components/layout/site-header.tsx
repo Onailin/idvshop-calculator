@@ -169,7 +169,7 @@ export function SiteHeader() {
             )}
             onClick={closeMenu}
           >
-            คำนวณกระดุม
+            คำนวณแพ็กเกจสกิน
           </NavLink>
           <NavLink
             href="/budget"
@@ -178,7 +178,7 @@ export function SiteHeader() {
             )}
             onClick={closeMenu}
           >
-            คำนวณแพ็กเกจ
+            คำนวณแพ็กเกจกระดุม
           </NavLink>
           <Link
             href="/login"

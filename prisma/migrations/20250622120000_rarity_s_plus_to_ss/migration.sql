@@ -1,0 +1,1 @@
+ALTER TYPE "Rarity" RENAME VALUE 'S+' TO 'SS';

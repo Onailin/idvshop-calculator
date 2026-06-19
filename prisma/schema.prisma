@@ -23,7 +23,7 @@ enum ItemType {
 
 enum Rarity {
   NONE
-  S_PLUS @map("S+")
+  SS
   S
   A
   B

@@ -61,7 +61,8 @@ export function ItemThumbnail({
               contain
               fill
               sizes={config.sizes}
-              loading="eager"
+              loading="lazy"
+              className="object-left"
             />
           </div>
         ) : (
@@ -71,7 +72,8 @@ export function ItemThumbnail({
             contain
             fill
             sizes={config.sizes}
-            loading="eager"
+            loading="lazy"
+            className="object-left"
           />
         )
       ) : (

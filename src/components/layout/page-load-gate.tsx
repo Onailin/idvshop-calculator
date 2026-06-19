@@ -19,6 +19,13 @@ import {
 import { cn } from "@/lib/utils";
 
 const BLOCKING_MAX_MS = 18_000;
+const CALCULATOR_PATHS = ["/skins", "/budget"];
+
+function isCalculatorPath(pathname: string) {
+  return CALCULATOR_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
 
 type PageLoadGateContextValue = {
   isBlocking: boolean;
@@ -70,6 +77,13 @@ export function PageLoadGate({ children }: { children: ReactNode }) {
 
     async function run() {
       startBlocking();
+
+      if (isCalculatorPath(pathname)) {
+        setTargetProgress(100);
+        setLoadInfo({ loaded: 0, total: 0, phase: "done" });
+        await finishBlocking(runId);
+        return;
+      }
 
       await waitForItemImages((progress) => {
         if (runIdRef.current !== runId) {

@@ -123,23 +123,18 @@ function PopupTextOverlay({
   const hasBody = Boolean(popup.body?.trim());
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex max-h-[58%] flex-col justify-end">
       <div
         className={cn(
-          "relative px-4 sm:px-5",
-          hasMultipleSlides
-            ? hasBody
-              ? "pb-[4.75rem] pt-20 sm:pb-[5rem] sm:pt-24"
-              : "pb-[4.25rem] pt-16 sm:pb-[4.5rem] sm:pt-20"
-            : hasBody
-              ? "pb-4 pt-20 sm:pt-24"
-              : "pb-4 pt-16 sm:pt-20",
+          "relative flex flex-col px-4 sm:px-5",
+          hasMultipleSlides ? "pb-[4.5rem] sm:pb-[4.75rem]" : "pb-4",
+          hasBody ? "pt-6 sm:pt-8" : "pt-4 sm:pt-5",
         )}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-[#7a3d52]/95 via-[#b86b82]/78 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#7a3d52]/95 via-[#b86b82]/80 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
 
-        <div className="relative space-y-2 sm:space-y-2.5">
+        <div className="relative flex min-h-0 flex-col gap-2 sm:gap-2.5">
           <SitePopupHeadline
             headline={popup.headline}
             headlineIcon={popup.headlineIcon}
@@ -149,7 +144,7 @@ function PopupTextOverlay({
           />
 
           {hasBody && (
-            <p className="popup-overlay-body line-clamp-2 text-sm leading-relaxed text-white/92 sm:text-[15px]">
+            <p className="popup-overlay-body min-h-0 flex-1 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-white/92 sm:text-[15px] sm:leading-7">
               {popup.body}
             </p>
           )}
@@ -159,7 +154,7 @@ function PopupTextOverlay({
             target="_blank"
             rel="noopener noreferrer"
             onClick={onFacebookClick}
-            className={cn(POPUP_CTA_BUTTON_CLASS, "pointer-events-auto")}
+            className={cn(POPUP_CTA_BUTTON_CLASS, "pointer-events-auto shrink-0")}
           >
             สอบถามเพิ่มเติม
           </Link>

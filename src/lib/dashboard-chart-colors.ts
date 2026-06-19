@@ -19,7 +19,7 @@ export const ITEM_TYPE_CHART_COLORS: Record<ItemType, string> = {
 };
 
 export const RARITY_CHART_COLORS: Record<Rarity, string> = {
-  S_PLUS: "#f43f5e",
+  SS: "#f43f5e",
   S: "#f59e0b",
   A: "#a855f7",
   B: "#3b82f6",

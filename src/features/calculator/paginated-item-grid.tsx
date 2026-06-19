@@ -8,6 +8,13 @@ import { chunkItems } from "@/lib/item-sort";
 import type { CalculatorItem } from "@/types";
 
 const ITEMS_PER_PAGE = 6;
+const PAGE_RENDER_WINDOW = 1;
+const PAGE_PLACEHOLDER_CLASS =
+  "box-border grid w-full min-w-full max-w-full shrink-0 snap-start grid-cols-1 gap-3 p-3 sm:grid-cols-2 sm:p-4 2xl:gap-4 min-h-[28rem] sm:min-h-[32rem]";
+
+function shouldRenderPage(pageIndex: number, activePage: number) {
+  return Math.abs(pageIndex - activePage) <= PAGE_RENDER_WINDOW;
+}
 
 type PaginatedItemGridProps = {
   items: CalculatorItem[];
@@ -90,21 +97,31 @@ export function PaginatedItemGrid({
         ref={scrollRef}
         className="flex w-full min-w-0 snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {pages.map((pageItems, pageIndex) => (
-          <div
-            key={pageIndex}
-            className="box-border grid w-full min-w-full max-w-full shrink-0 snap-start grid-cols-1 gap-3 p-3 sm:grid-cols-2 sm:p-4 2xl:gap-4"
-          >
-            {pageItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                selected={selectedIds.has(item.id)}
-                onToggle={onToggle}
-              />
-            ))}
-          </div>
-        ))}
+        {pages.map((pageItems, pageIndex) => {
+          const isRendered = shouldRenderPage(pageIndex, activePage);
+
+          return (
+            <div
+              key={pageIndex}
+              className={
+                isRendered
+                  ? "box-border grid w-full min-w-full max-w-full shrink-0 snap-start grid-cols-1 gap-3 p-3 sm:grid-cols-2 sm:p-4 2xl:gap-4"
+                  : PAGE_PLACEHOLDER_CLASS
+              }
+              aria-hidden={!isRendered}
+            >
+              {isRendered &&
+                pageItems.map((item) => (
+                  <ItemCard
+                    key={item.id}
+                    item={item}
+                    selected={selectedIds.has(item.id)}
+                    onToggle={onToggle}
+                  />
+                ))}
+            </div>
+          );
+        })}
       </div>
 
       {hasMultiplePages && (

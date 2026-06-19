@@ -4,7 +4,7 @@ export const DEFAULT_RARITY: Rarity = "NONE";
 
 export const RARITIES = [
   "NONE",
-  "S_PLUS",
+  "SS",
   "S",
   "A",
   "B",
@@ -13,7 +13,7 @@ export const RARITIES = [
 
 export const RARITY_LABELS: Record<Rarity, string> = {
   NONE: "ไม่มี",
-  S_PLUS: "S+",
+  SS: "SS",
   S: "S",
   A: "A",
   B: "B",
@@ -22,7 +22,7 @@ export const RARITY_LABELS: Record<Rarity, string> = {
 
 export const RARITY_COLORS: Record<Rarity, string> = {
   NONE: "bg-muted text-muted-foreground border border-border",
-  S_PLUS: "bg-rose-500 text-white",
+  SS: "bg-rose-500 text-white",
   S: "bg-amber-500 text-white",
   A: "bg-purple-500 text-white",
   B: "bg-blue-500 text-white",
