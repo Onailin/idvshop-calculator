@@ -3,7 +3,7 @@
 import { Separator } from "@/components/ui/separator";
 import { ButtonAmount, ButtonBreakdown } from "@/components/ui/button-amount";
 import { CalculatorOrderButton } from "@/features/calculator/calculator-order-button";
-import { formatBahtInt } from "@/lib/utils";
+import { cn, formatBahtInt } from "@/lib/utils";
 import { getCombinationTopupTotal } from "@/services/packageOptimizer";
 import type { PackageCombination, PackageLineItem } from "@/types/package";
 import type { ReactNode } from "react";
@@ -21,12 +21,30 @@ function getTopupPerUnit(item: PackageLineItem): number {
   return item.topupAmount ?? item.buttons;
 }
 
+const PACKAGE_LINE_GRID =
+  "grid grid-cols-[minmax(0,1fr)_2.75rem_4.5rem] items-start gap-x-2 sm:grid-cols-[minmax(0,1fr)_3rem_5rem] sm:gap-x-3";
+
+function PackageLineHeader() {
+  return (
+    <div
+      className={cn(
+        PACKAGE_LINE_GRID,
+        "mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground",
+      )}
+    >
+      <span>แพ็ก</span>
+      <span className="text-right">จำนวน</span>
+      <span className="text-right">ราคา</span>
+    </div>
+  );
+}
+
 function PackageLine({ item }: { item: PackageLineItem }) {
   const topup = getTopupPerUnit(item);
   const lineTotal = item.price * item.quantity;
 
   return (
-    <li className="flex items-start justify-between gap-4 text-sm">
+    <li className={cn(PACKAGE_LINE_GRID, "text-sm")}>
       <div className="min-w-0">
         <p className="flex flex-wrap items-center gap-x-2 font-medium">
           <ButtonAmount value={item.buttons} size="sm" highlight />
@@ -36,13 +54,11 @@ function PackageLine({ item }: { item: PackageLineItem }) {
           <ButtonBreakdown topup={topup} buttons={item.buttons} />
         </p>
       </div>
-      <span className="shrink-0 text-muted-foreground">
-        × {item.quantity}
-        {item.quantity > 1 && (
-          <span className="block text-right font-medium text-foreground">
-            {formatBahtInt(lineTotal)}
-          </span>
-        )}
+      <span className="pt-0.5 text-right tabular-nums text-muted-foreground">
+        ×{item.quantity}
+      </span>
+      <span className="pt-0.5 text-right tabular-nums font-medium text-foreground">
+        {formatBahtInt(lineTotal)}
       </span>
     </li>
   );
@@ -157,6 +173,7 @@ export function CalculatorCombinationCard({
       <Separator className="my-4" />
 
       <p className="mb-2 text-sm font-semibold">รายละเอียดแพ็กเกจ</p>
+      <PackageLineHeader />
       <ul className="space-y-2">
         {combination.items.map((item) => (
           <PackageLine key={`${item.packageId}-${item.quantity}`} item={item} />
