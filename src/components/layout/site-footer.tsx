@@ -76,7 +76,7 @@ export function SiteFooter({ className }: SiteFooterProps) {
 
         <div className="mt-4 flex flex-col gap-1 border-t border-white/60 pt-3 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} {BRAND_NAME}</p>
-          <p>Identity V เป็นเครื่องหมายการค้าของ NetEase Games</p>
+          
         </div>
       </div>
     </footer>

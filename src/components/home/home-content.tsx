@@ -24,8 +24,9 @@ export function HomeContent({ banners }: HomeContentProps) {
       >
         <div className="overflow-hidden rounded-2xl">
           <HomeHeroBanner slides={banners.heroSlides} embedded />
-          <StoreInfoSection embedded />
         </div>
+
+        <StoreInfoSection />
 
         {banners.eventSlides.length > 0 && (
           <EventBannerCarousel slides={banners.eventSlides} />

@@ -103,3 +103,31 @@ model Banner {
 
   @@index([isActive, sortOrder])
 }
+
+model SitePopup {
+  id            String           @id @default(cuid())
+  headline      String?
+  headlineIcon  String?          @default("sparkles")
+  headlineStyle String?          @default("rose")
+  body          String?
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  images        SitePopupImage[]
+
+  @@index([isActive])
+}
+
+model SitePopupImage {
+  id        String    @id @default(cuid())
+  popupId   String
+  popup     SitePopup @relation(fields: [popupId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  imageAlt  String
+  linkUrl   String?
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([popupId, sortOrder])
+}

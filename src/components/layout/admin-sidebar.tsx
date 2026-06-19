@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  AppWindow,
   Boxes,
   FolderOpen,
   ImageIcon,
@@ -25,6 +26,7 @@ const baseNavItems = [
   { href: "/admin/items", label: "รายการไอเทม", icon: Package },
   { href: "/admin/packages", label: "แพ็กเกจ", icon: Boxes },
   { href: "/admin/banners", label: "แบนเนอร์", icon: ImageIcon },
+  { href: "/admin/popups", label: "ป๊อปอัพ", icon: AppWindow },
   { href: "/admin/settings", label: "การตั้งค่า", icon: Settings },
 ];
 

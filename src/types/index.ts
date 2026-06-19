@@ -7,6 +7,7 @@ import type {
   PackageGroup,
   Rarity,
   Role,
+  SitePopup,
 } from "@prisma/client";
 
 export type {
@@ -18,6 +19,7 @@ export type {
   PackageGroup,
   Rarity,
   Role,
+  SitePopup,
 };
 
 export type ItemWithCategory = Item & {

@@ -58,4 +58,14 @@ export const messages = {
   bannerDeleteFailed: "ลบแบนเนอร์ไม่สำเร็จ",
   bannerEnabled: "เปิดใช้งานแบนเนอร์แล้ว",
   bannerDisabled: "ปิดใช้งานแบนเนอร์แล้ว",
+
+  sitePopupCreated: "เพิ่มป๊อปอัพสำเร็จ",
+  sitePopupUpdated: "อัปเดตป๊อปอัพสำเร็จ",
+  sitePopupDeleted: "ลบป๊อปอัพสำเร็จ",
+  sitePopupNotFound: "ไม่พบป๊อปอัพ",
+  sitePopupCreateFailed: "เพิ่มป๊อปอัพไม่สำเร็จ",
+  sitePopupUpdateFailed: "อัปเดตป๊อปอัพไม่สำเร็จ",
+  sitePopupDeleteFailed: "ลบป๊อปอัพไม่สำเร็จ",
+  sitePopupEnabled: "เปิดใช้งานป๊อปอัพแล้ว",
+  sitePopupDisabled: "ปิดใช้งานป๊อปอัพแล้ว",
 } as const;

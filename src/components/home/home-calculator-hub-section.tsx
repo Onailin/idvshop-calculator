@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 const CALCULATOR_LINKS = [
   {
     href: "/skins",
-    label: "คำนวณแพ็คสกิน",
-    description: "เลือกไอเทมหลายรายการ ดูยอดรวมและแพ็กที่คุ้มที่สุด",
+    label: "คำนวณแพ็กเกจสกิน/ไอเท็ม และอีเว้นท์ต่างๆ",
+    description: "เลือกไอเท็มได้หลายรายการ เพื่อดูยอดรวมและในราคาจึ้งๆ",
     imageSrc: HOME_CALCULATOR_SKINS_IMAGE.imageSrc,
     alt: HOME_CALCULATOR_SKINS_IMAGE.alt,
     icon: Sparkles,
@@ -16,8 +16,8 @@ const CALCULATOR_LINKS = [
   },
   {
     href: "/budget",
-    label: "คำนวณคูปอง",
-    description: "จัดสรรคูปอง 3% / 10% ตามแพ็กเกจให้คุ้มงบที่สุด",
+    label: "คำนวณแพ็กเกจกระดุม",
+    description: "คำนวณตามงบ / จำนวนกระดุม / จำนวนยอดเติม และคูปองส่วนลด",
     imageSrc: undefined,
     alt: "คำนวณคูปอง",
     icon: Percent,
@@ -27,7 +27,11 @@ const CALCULATOR_LINKS = [
 
 export function HomeCalculatorHubSection() {
   return (
-    <section aria-labelledby="calculator-hub-heading" className="space-y-6">
+    <section
+      id="calculator-hub"
+      aria-labelledby="calculator-hub-heading"
+      className="scroll-mt-24 space-y-5 sm:space-y-6"
+    >
       <div className="px-1 text-center sm:text-left">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           เครื่องมือ

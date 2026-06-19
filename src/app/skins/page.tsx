@@ -32,10 +32,10 @@ export default async function SkinsPage() {
         <div className="mb-6 lg:mb-8">
           <span className="ios-pill">เครื่องคำนวณ</span>
           <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-            คำนวณแพ็คเกจสกิน เครื่องประดับ กาชาแก่นความทรงจำ
+            คำนวณแพ็กเกจสกิน/ไอเท็ม และอีเว้นท์ต่างๆ
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            เลือกไอเทมหรือกรอกจำนวนกระดุม เพื่อดูแพ็กเกจและราคาที่ต้องจ่าย
+            เลือกไอเท็มได้หลายรายการ เพื่อดูยอดรวมและในราคาจึ้งๆ
           </p>
         </div>
         <ItemCalculator

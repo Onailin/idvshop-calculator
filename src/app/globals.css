@@ -90,6 +90,15 @@
     @apply inline-flex items-center rounded-full border border-white/80 bg-white/70 px-4 py-1.5 text-xs font-semibold tracking-wide text-muted-foreground shadow-sm backdrop-blur-md;
   }
 
+  .popup-cute-outline {
+    text-shadow:
+      2px 2px 0 #ffffff,
+      -1px -1px 0 #ffffff,
+      1px -1px 0 #ffffff,
+      -1px 1px 0 #ffffff,
+      0 4px 14px rgba(214, 146, 164, 0.35);
+  }
+
   button,
   input,
   select,

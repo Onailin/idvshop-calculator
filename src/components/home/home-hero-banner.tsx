@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { BannerCarouselArrows } from "@/components/home/banner-carousel-arrows";
 import { BannerCarouselDots } from "@/components/home/banner-carousel-dots";
 import {
   HOME_BANNER_SLIDE_DURATION_MS,
@@ -97,6 +98,24 @@ export function HomeHeroBanner({
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  const goTo = useCallback(
+    (index: number) => {
+      if (slides.length === 0) {
+        return;
+      }
+      setActiveIndex((index + slides.length) % slides.length);
+    },
+    [slides.length],
+  );
+
+  const goToPrevious = useCallback(() => {
+    goTo(activeIndex - 1);
+  }, [activeIndex, goTo]);
+
+  const goToNext = useCallback(() => {
+    goTo(activeIndex + 1);
+  }, [activeIndex, goTo]);
+
   useEffect(() => {
     if (slides.length <= 1 || isPaused) {
       return;
@@ -160,12 +179,18 @@ export function HomeHeroBanner({
         )}
 
         {hasMultipleSlides && (
-          <BannerCarouselDots
-            slides={slides}
-            activeIndex={activeIndex}
-            onSelect={setActiveIndex}
-            overlay
-          />
+          <>
+            <BannerCarouselArrows
+              onPrevious={goToPrevious}
+              onNext={goToNext}
+            />
+            <BannerCarouselDots
+              slides={slides}
+              activeIndex={activeIndex}
+              onSelect={goTo}
+              overlay
+            />
+          </>
         )}
       </div>
     </section>

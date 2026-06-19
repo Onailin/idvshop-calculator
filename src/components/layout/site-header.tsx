@@ -116,8 +116,8 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 rounded-full border border-white/70 bg-white/55 p-1 shadow-sm backdrop-blur-md sm:flex sm:gap-1.5">
-          <NavLink href="/skins">คำนวณแพ็คสกิน</NavLink>
-          <NavLink href="/budget">คำนวณคูปอง</NavLink>
+          <NavLink href="/skins">คำนวณแพ็กเกจสกิน</NavLink>
+          <NavLink href="/budget">คำนวณแพ็กเกจกระดุม</NavLink>
           <Link
             href="/login"
             className={cn("flex items-center gap-2", navLinkClass(isAdmin))}

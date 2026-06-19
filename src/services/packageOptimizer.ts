@@ -161,15 +161,11 @@ export function compareRequirementPriority(
   if (a.totalPrice !== b.totalPrice) {
     return a.totalPrice - b.totalPrice;
   }
-  // 2) ราคาเท่ากัน → ได้กระดุมมากกว่า (แพ็กเล็กหลายใบก็ได้)
-  if (a.totalButtons !== b.totalButtons) {
-    return b.totalButtons - a.totalButtons;
+  // 2) ราคาเท่ากัน → กระดุมเหลือมากกว่า (คุ้มกว่า)
+  if (a.remainingButtons !== b.remainingButtons) {
+    return b.remainingButtons - a.remainingButtons;
   }
-  // 3) ราคาและกระดุมเท่ากัน → บาท/กระดุมต่ำกว่า
-  if (a.valuePerButton !== b.valuePerButton) {
-    return a.valuePerButton - b.valuePerButton;
-  }
-  // 4) สุดท้าย → ซื้อน้อยครั้งกว่า
+  // 3) สุดท้าย → ซื้อน้อยครั้งกว่า
   return a.packageCount - b.packageCount;
 }
 
@@ -729,37 +725,7 @@ export function pickTopSkinRecommendations(
   combinations: PackageCombination[],
   limit: number = 3,
 ): PackageCombination[] {
-  const sorted = sortByRequirementPriority(combinations);
-  const picked: PackageCombination[] = [];
-  const seenKeys = new Set<string>();
-  const seenPrices = new Set<number>();
-
-  for (const combination of sorted) {
-    if (picked.length >= limit) {
-      break;
-    }
-    const key = combinationKey(combination);
-    if (seenKeys.has(key) || seenPrices.has(combination.totalPrice)) {
-      continue;
-    }
-    seenKeys.add(key);
-    seenPrices.add(combination.totalPrice);
-    picked.push(combination);
-  }
-
-  for (const combination of sorted) {
-    if (picked.length >= limit) {
-      break;
-    }
-    const key = combinationKey(combination);
-    if (seenKeys.has(key)) {
-      continue;
-    }
-    seenKeys.add(key);
-    picked.push(combination);
-  }
-
-  return picked;
+  return pickTopUniqueCombinations(combinations, limit, sortByRequirementPriority);
 }
 
 export function pickTopUniqueCombinations(

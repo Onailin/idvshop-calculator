@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { BannerCarouselArrows } from "@/components/home/banner-carousel-arrows";
 import { BannerCarouselDots } from "@/components/home/banner-carousel-dots";
 import {
   HOME_BANNER_SLIDE_DURATION_MS,
@@ -38,6 +39,14 @@ export function EventBannerCarousel({
     },
     [slides.length],
   );
+
+  const goToPrevious = useCallback(() => {
+    goTo(activeIndex - 1);
+  }, [activeIndex, goTo]);
+
+  const goToNext = useCallback(() => {
+    goTo(activeIndex + 1);
+  }, [activeIndex, goTo]);
 
   useEffect(() => {
     if (slides.length <= 1 || isPaused) {
@@ -164,12 +173,18 @@ export function EventBannerCarousel({
         </div>
 
         {slides.length > 1 && (
-          <BannerCarouselDots
-            slides={slides}
-            activeIndex={activeIndex}
-            onSelect={goTo}
-            overlay
-          />
+          <>
+            <BannerCarouselArrows
+              onPrevious={goToPrevious}
+              onNext={goToNext}
+            />
+            <BannerCarouselDots
+              slides={slides}
+              activeIndex={activeIndex}
+              onSelect={goTo}
+              overlay
+            />
+          </>
         )}
       </div>
     </section>

@@ -15,10 +15,10 @@ import {
 } from "@/services/discountCalculator";
 import { PriceWithDiscount } from "@/features/calculator/price-with-discount";
 import { CalculatorCombinationCard } from "@/features/calculator/calculator-combination-card";
+import { CalculatorOrderButton } from "@/features/calculator/calculator-order-button";
 import { QuantityStepper } from "@/features/calculator/quantity-stepper";
 import {
   sanitizeCalculatorAmountInput,
-  TOP_CALCULATOR_RESULTS,
 } from "@/lib/calculator-constants";
 import { NoPackagesMessage, parseAmount } from "@/features/calculator/package-result-list";
 import { Button } from "@/components/ui/button";
@@ -539,8 +539,9 @@ function CouponCalculatorTab({ packages }: { packages: PackageInput[] }) {
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
               <CardTitle className="text-lg">สรุปผล</CardTitle>
+              <CalculatorOrderButton />
             </CardHeader>
             <CardContent className="space-y-4">
               <dl className="space-y-2 text-sm">

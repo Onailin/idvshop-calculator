@@ -65,7 +65,13 @@ function generateRequirementCombinations(
   grouped: GroupedPackages,
   requiredButtons: number,
 ) {
+  const shouldEnumerate =
+    requiredButtons <= PACKAGE_OPTIMIZER_LIMITS.fullEnumerationMaxButtons;
   const allCombinations: PackageCombination[] = [];
+  const candidateLimit = Math.max(
+    PACKAGE_OPTIMIZER_LIMITS.requirementCandidateLimit,
+    PACKAGE_OPTIMIZER_LIMITS.maxCombinations,
+  );
 
   for (const group of grouped.values()) {
     const topCombinations = findTopRequirementCombinations(
@@ -73,9 +79,13 @@ function generateRequirementCombinations(
       requiredButtons,
       group.groupId,
       group.groupName,
-      PACKAGE_OPTIMIZER_LIMITS.requirementCandidateLimit,
+      candidateLimit,
     );
     allCombinations.push(...topCombinations);
+
+    if (!shouldEnumerate) {
+      continue;
+    }
 
     const enumerated = generateCombinations(group.packages, {
       groupId: group.groupId,
@@ -192,11 +202,12 @@ export function getSkinRecommendations(
   const combinations = sortByRequirementPriority(
     generateRequirementCombinations(grouped, requiredButtons),
   );
+  const valueSorted = sortByValuePriority(combinations);
 
   return {
     requiredButtons,
     bestRecommendation: combinations[0] ?? null,
-    bestValueCombination: combinations[0] ?? null,
+    bestValueCombination: valueSorted[0] ?? null,
     combinations,
   };
 }
