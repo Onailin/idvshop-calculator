@@ -99,6 +99,44 @@
       0 4px 14px rgba(214, 146, 164, 0.35);
   }
 
+  .popup-overlay-body {
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
+  }
+
+  @keyframes popup-glow-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.03);
+    }
+  }
+
+  @keyframes popup-shine-sweep {
+    0% {
+      transform: translateX(-120%) skewX(-12deg);
+      opacity: 0;
+    }
+    35% {
+      opacity: 0.65;
+    }
+    100% {
+      transform: translateX(220%) skewX(-12deg);
+      opacity: 0;
+    }
+  }
+
+  .popup-glow-pulse {
+    animation: popup-glow-pulse 3.5s ease-in-out infinite;
+  }
+
+  .popup-shine-sweep {
+    animation: popup-shine-sweep 4.5s ease-in-out infinite;
+  }
+
   button,
   input,
   select,

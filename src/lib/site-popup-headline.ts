@@ -89,6 +89,8 @@ type HeadlineStyleConfig = {
   title: string;
   header: string;
   accentDot: string;
+  overlayTitle: string;
+  overlayRibbon: string;
 };
 
 const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
@@ -102,6 +104,9 @@ const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
     header:
       "border-brand-blush/40 bg-gradient-to-r from-brand-cream/90 via-white to-brand-cream/90",
     accentDot: "bg-primary/35",
+    overlayTitle:
+      "text-white [text-shadow:0_0_24px_rgba(214,146,164,0.95),0_2px_12px_rgba(0,0,0,0.85)]",
+    overlayRibbon: "from-primary via-brand-rose to-transparent",
   },
   gold: {
     badge: "border-amber-200 bg-amber-50 text-amber-700",
@@ -112,6 +117,9 @@ const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
     header:
       "border-amber-100 bg-gradient-to-r from-amber-50/90 via-white to-orange-50/80",
     accentDot: "bg-amber-300/70",
+    overlayTitle:
+      "text-white [text-shadow:0_0_22px_rgba(251,191,36,0.9),0_2px_12px_rgba(0,0,0,0.85)]",
+    overlayRibbon: "from-amber-400 via-orange-400 to-transparent",
   },
   purple: {
     badge: "border-violet-200 bg-violet-50 text-violet-700",
@@ -122,6 +130,9 @@ const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
     header:
       "border-violet-100 bg-gradient-to-r from-violet-50/90 via-white to-fuchsia-50/80",
     accentDot: "bg-violet-300/70",
+    overlayTitle:
+      "text-white [text-shadow:0_0_22px_rgba(167,139,250,0.95),0_2px_12px_rgba(0,0,0,0.85)]",
+    overlayRibbon: "from-violet-400 via-fuchsia-400 to-transparent",
   },
   ocean: {
     badge: "border-sky-200 bg-sky-50 text-sky-700",
@@ -132,6 +143,9 @@ const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
     header:
       "border-sky-100 bg-gradient-to-r from-sky-50/90 via-white to-cyan-50/80",
     accentDot: "bg-sky-300/70",
+    overlayTitle:
+      "text-white [text-shadow:0_0_22px_rgba(56,189,248,0.95),0_2px_12px_rgba(0,0,0,0.85)]",
+    overlayRibbon: "from-sky-400 via-cyan-400 to-transparent",
   },
   emerald: {
     badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
@@ -142,6 +156,9 @@ const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
     header:
       "border-emerald-100 bg-gradient-to-r from-emerald-50/90 via-white to-teal-50/80",
     accentDot: "bg-emerald-300/70",
+    overlayTitle:
+      "text-white [text-shadow:0_0_22px_rgba(52,211,153,0.95),0_2px_12px_rgba(0,0,0,0.85)]",
+    overlayRibbon: "from-emerald-400 via-teal-400 to-transparent",
   },
   sunset: {
     badge: "border-orange-200 bg-orange-50 text-orange-700",
@@ -152,6 +169,9 @@ const STYLE_MAP: Record<SitePopupHeadlineStyle, HeadlineStyleConfig> = {
     header:
       "border-orange-100 bg-gradient-to-r from-rose-50/90 via-white to-amber-50/80",
     accentDot: "bg-orange-300/70",
+    overlayTitle:
+      "text-white [text-shadow:0_0_22px_rgba(251,146,60,0.95),0_2px_12px_rgba(0,0,0,0.85)]",
+    overlayRibbon: "from-rose-400 via-orange-400 to-transparent",
   },
 };
 
