@@ -16,9 +16,9 @@ const anuphan = Anuphan({
 });
 
 export const metadata: Metadata = {
-  title: "เครื่องคำนวณราคา Identity V",
+  title: "Harmony TopUp บริการเติมเกมออนไลน์",
   description:
-    "คำนวณกระดุมและแนะนำแพ็กเกจสำหรับสกินและไอเทม Identity V",
+    "Harmony TopUp — บริการเติมเกม Identity V คำนวณกระดุมและแนะนำแพ็กเกจสำหรับสกินและไอเทม",
 };
 
 export default async function RootLayout({
