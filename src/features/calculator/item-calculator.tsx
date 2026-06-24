@@ -64,19 +64,39 @@ export function ItemCalculator({
                 className="pl-9"
               />
             </div>
-            <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="กรองตามหมวดหมู่" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">ทุกหมวดหมู่</SelectItem>
+
+            <div className="w-full sm:w-[200px]">
+              <label htmlFor="category-filter" className="sr-only">
+                กรองตามหมวดหมู่
+              </label>
+              <select
+                id="category-filter"
+                value={categoryId}
+                onChange={(event) => setCategoryId(event.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:hidden"
+              >
+                <option value="all">ทุกหมวดหมู่</option>
                 {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
+                  <option key={category.id} value={category.id}>
                     {category.name}
-                  </SelectItem>
+                  </option>
                 ))}
-              </SelectContent>
-            </Select>
+              </select>
+
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger className="hidden w-full sm:flex">
+                  <SelectValue placeholder="กรองตามหมวดหมู่" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">ทุกหมวดหมู่</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {filteredItems.length === 0 ? (
