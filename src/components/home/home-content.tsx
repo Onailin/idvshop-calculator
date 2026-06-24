@@ -26,13 +26,13 @@ export function HomeContent({ banners }: HomeContentProps) {
           <HomeHeroBanner slides={banners.heroSlides} embedded />
         </div>
 
-        <StoreInfoSection />
+        <HomeCalculatorHubSection />
 
         {banners.eventSlides.length > 0 && (
           <EventBannerCarousel slides={banners.eventSlides} />
         )}
 
-        <HomeCalculatorHubSection />
+        <StoreInfoSection />
       </PageContainer>
     </main>
   );
