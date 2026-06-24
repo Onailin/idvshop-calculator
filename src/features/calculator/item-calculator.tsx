@@ -13,6 +13,7 @@ import { useCalculator } from "@/hooks/use-calculator";
 import { PaginatedItemGrid } from "@/features/calculator/paginated-item-grid";
 import { PriceSummary } from "@/features/calculator/price-summary";
 import { ButtonsPackageCalculator } from "@/features/calculator/buttons-package-calculator";
+import { RecentOrderBanner } from "@/features/calculator/recent-order-banner";
 import type { CalculatorItem } from "@/types";
 import type { PackageGroupOption, PackageInput } from "@/types/package";
 
@@ -119,6 +120,8 @@ export function ItemCalculator({
           quantity: line.quantity,
         }))}
       />
+
+      <RecentOrderBanner />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatOrderChannel } from "@/lib/order-format";
+import { saveRecentOrder } from "@/lib/recent-order-storage";
 import { STORE_FACEBOOK_URL, STORE_LINE_URL } from "@/lib/store-links";
 import { cn, formatBahtInt } from "@/lib/utils";
 import type { CustomerOrderSummary, OrderPayload } from "@/types/order";
@@ -85,6 +86,7 @@ export function OrderCheckoutDialog({
       }
 
       setSummary(result.data);
+      saveRecentOrder(result.data);
       setStep("summary");
     });
   }
@@ -206,6 +208,10 @@ export function OrderCheckoutDialog({
               กรุณาคัดลอกเลขออเดอร์ด้านล่าง
               <br />
               แล้วส่งแจ้งแอดมินก่อนสั่งซื้อ
+            </p>
+            <p className="text-center text-xs text-muted-foreground">
+              หากปิดหน้านี้โดยไม่ได้คัดลอก สามารถกลับมาดูเลขออเดอร์ได้ที่หน้าคำนวณ
+              (บันทึกไว้ในเบราว์เซอร์นี้ 7 วัน)
             </p>
 
             <div className="rounded-xl border border-brand-blush/50 bg-brand-cream/40 p-4">

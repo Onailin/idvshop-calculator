@@ -16,6 +16,7 @@ import {
 import { PriceWithDiscount } from "@/features/calculator/price-with-discount";
 import { CalculatorCombinationCard } from "@/features/calculator/calculator-combination-card";
 import { CalculatorOrderButton } from "@/features/calculator/calculator-order-button";
+import { RecentOrderBanner } from "@/features/calculator/recent-order-banner";
 import { QuantityStepper } from "@/features/calculator/quantity-stepper";
 import {
   sanitizeCalculatorAmountInput,
@@ -777,6 +778,8 @@ export function PackageCalculatorPage({
 
         {activeTab === "coupon" && <CouponCalculatorTab packages={packages} />}
       </div>
+
+      <RecentOrderBanner />
     </div>
   );
 }
