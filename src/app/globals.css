@@ -137,6 +137,73 @@
     animation: popup-shine-sweep 4.5s ease-in-out infinite;
   }
 
+  @keyframes calculator-card-shine {
+    0% {
+      transform: translateX(-120%) skewX(-12deg);
+      opacity: 0;
+    }
+    35% {
+      opacity: 0.55;
+    }
+    100% {
+      transform: translateX(220%) skewX(-12deg);
+      opacity: 0;
+    }
+  }
+
+  .calculator-hub-card {
+    @apply transition-[transform,box-shadow,ring-color] duration-300 ease-out;
+  }
+
+  .calculator-hub-card:hover {
+    @apply -translate-y-1 shadow-[0_20px_48px_-14px_rgba(214,146,164,0.42)] ring-2 ring-primary/20;
+  }
+
+  .calculator-hub-card:hover .calculator-hub-card-shine {
+    animation: calculator-card-shine 0.85s ease-out;
+  }
+
+  .calculator-hub-card:hover .calculator-hub-card-image {
+    @apply brightness-[1.04];
+  }
+
+  .calculator-hub-card:hover .calculator-hub-card-arrow {
+    @apply translate-x-0.5 -translate-y-0.5 bg-primary text-white;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .calculator-hub-card,
+    .calculator-hub-card-image,
+    .calculator-hub-card-arrow,
+    .calculator-hub-card-shine,
+    .calculator-hub-gem {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .calculator-hub-card:hover {
+      transform: none;
+    }
+  }
+
+  @keyframes calculator-gem-float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--gem-rotate, 0deg));
+    }
+    50% {
+      transform: translateY(-6px) rotate(var(--gem-rotate, 0deg));
+    }
+  }
+
+  .calculator-hub-gem {
+    animation: calculator-gem-float 5.5s ease-in-out infinite;
+  }
+
+  .calculator-hub-gem-delay {
+    animation-delay: -2.1s;
+  }
+
   button,
   input,
   select,

@@ -47,7 +47,7 @@ function generateTrackCode(): string {
       ] ?? "A";
   }
 
-  return `HTU-${ymd}-${suffix}`;
+  return `HMN-${ymd}-${suffix}`;
 }
 
 function isUniqueConstraintError(error: unknown): boolean {

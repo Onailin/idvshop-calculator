@@ -20,10 +20,27 @@ export const HOME_HERO_BANNER: HomeBannerSlide = {
   gradient: "from-primary/45 via-brand-rose/30 to-brand-blush/90",
 };
 
-/** รูปการ์ดคำนวณแพ็คสกิน — วางที่ public/home/calculator-skins.jpg */
+/** รูปอัญมณีตกแต่งหัวข้อ — วางที่ public/home/gems.png */
+export const HOME_GEM_DECORATION = {
+  imageSrc: "/home/gems.png",
+  width: 1200,
+  height: 1200,
+} as const;
+
+/** รูปการ์ดคำนวณแพ็คสกิน — วางที่ public/home/calculator-skins.png */
 export const HOME_CALCULATOR_SKINS_IMAGE = {
-  alt: "คำนวณแพ็คสกิน",
-  imageSrc: "/home/calculator-skins.jpg",
+  alt: "คำนวณแพ็กเกจสกิน/ไอเท็ม",
+  imageSrc: "/home/calculator-skins.png",
+  width: 1792,
+  height: 1792,
+} as const;
+
+/** รูปการ์ดคำนวณแพ็กเกจกระดุม — วางที่ public/home/calculato-butons.png */
+export const HOME_CALCULATOR_BUTTONS_IMAGE = {
+  alt: "คำนวณแพ็กเกจกระดุม",
+  imageSrc: "/home/calculato-butons.png",
+  width: 1792,
+  height: 1792,
 } as const;
 
 /** แก้รายการนี้เมื่อมีอีเว้นต์ใหม่ — สำรองไว้ใช้ภายหลัง */
