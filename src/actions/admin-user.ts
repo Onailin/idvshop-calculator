@@ -16,7 +16,7 @@ import type { ActionResult } from "@/types";
 export type AdminUserListItem = {
   id: string;
   username: string;
-  role: "SUPER_ADMIN" | "ADMIN";
+  role: "SUPER_ADMIN" | "ADMIN"; 
   createdAt: Date;
 };
 

@@ -1,4 +1,4 @@
-export const TOP_CALCULATOR_RESULTS = 4;
+export const TOP_CALCULATOR_RESULTS = 1;
 
 /** จำกัดยอดสูงสุดที่คำนวณได้ — กันเบราว์เซอร์ค้าง */
 export const MAX_CALCULATOR_AMOUNT = 500_000;

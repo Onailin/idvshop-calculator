@@ -43,6 +43,7 @@ import {
 } from "@/lib/package-group-default";
 import { cn, formatBahtInt, formatButtons } from "@/lib/utils";
 import type {
+  CouponAllocationLine,
   CouponAllocationResult,
   GlobalCouponInventory,
   SelectedPackageEntry,
@@ -128,7 +129,6 @@ type AmountTabProps = {
   onChange: (value: string) => void;
   results: PackageCombination[];
   emphasis: "budget" | "buttons" | "topup";
-  budget?: number;
   emptyMessage: string;
   isCalculating?: boolean;
 };
@@ -143,7 +143,6 @@ function AmountCalculatorTab({
   onChange,
   results,
   emphasis,
-  budget,
   emptyMessage,
   isCalculating = false,
 }: AmountTabProps) {
@@ -182,7 +181,7 @@ function AmountCalculatorTab({
       {amount > 0 && (
         <section className="space-y-3">
           <h3 className="text-sm font-semibold">
-            ผลลัพธ์ที่แนะนำ (Top 4)
+            แพ็กเกจที่คุ้มที่สุด
             {isCalculating && (
               <span className="ml-2 font-normal text-muted-foreground">
                 · กำลังคำนวณ...
@@ -192,14 +191,13 @@ function AmountCalculatorTab({
           {results.length === 0 ? (
             <p className="text-sm text-muted-foreground">{emptyMessage}</p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="max-w-md">
               {results.map((combination, index) => (
                 <CalculatorCombinationCard
                   key={`${combination.groupId}-${index}`}
                   combination={combination}
                   rank={index + 1}
                   emphasis={emphasis}
-                  budget={budget}
                 />
               ))}
             </div>
@@ -208,6 +206,41 @@ function AmountCalculatorTab({
       )}
     </div>
   );
+}
+
+type CouponDisplayLine = {
+  buttons: number;
+  couponLabel: string;
+  quantity: number;
+};
+
+function formatCouponLabel(coupon: CouponAllocationLine["coupon"]): string {
+  if (coupon === "10%") return "คูปอง 10%";
+  if (coupon === "3%") return "คูปอง 3%";
+  return "ราคาปกติ";
+}
+
+function aggregateCouponDisplayLines(
+  lines: CouponAllocationLine[],
+): CouponDisplayLine[] {
+  const lineMap = new Map<string, CouponDisplayLine>();
+
+  for (const line of lines) {
+    const key = `${line.packageId}:${line.coupon ?? "regular"}`;
+    const existing = lineMap.get(key);
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      lineMap.set(key, {
+        buttons: line.buttons,
+        couponLabel: formatCouponLabel(line.coupon),
+        quantity: 1,
+      });
+    }
+  }
+
+  return Array.from(lineMap.values());
 }
 
 function CouponCalculatorTab({ packages }: { packages: PackageInput[] }) {
@@ -498,103 +531,100 @@ function CouponCalculatorTab({ packages }: { packages: PackageInput[] }) {
       </Card>
 
       {result && (
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">รายละเอียดการใช้คูปอง</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <table className="w-full min-w-[320px] text-sm">
-                <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="pb-2 pr-4 font-medium">แพ็กเกจ</th>
-                    <th className="pb-2 pr-4 font-medium">คูปอง</th>
-                    <th className="pb-2 font-medium">ราคา</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.lines.map((line, index) => (
-                    <tr key={`${line.packageId}-${index}`} className="border-b last:border-0">
-                      <td className="py-2 pr-4">
-                        <ButtonAmount
-                          value={line.buttons}
-                          size="sm"
-                          highlight
-                        />
-                      </td>
-                      <td className="py-2 pr-4">
-                        {line.coupon ?? "ราคาปกติ"}
-                      </td>
-                      <td className="py-2">
-                        <PriceWithDiscount
-                          regular={line.referencePrice}
-                          discounted={line.price}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
-              <CardTitle className="text-lg">สรุปผล</CardTitle>
-              <CalculatorOrderButton />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">กระดุมรวม</dt>
-                  <dd>
-                    <ButtonAmount
-                      value={result.totalButtons}
-                      size="sm"
-                      highlight
-                    />
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">ยอดเติมสะสมรวม</dt>
-                  <dd>
-                    <ButtonAmount value={result.totalTopup} suffix={false} size="sm" />
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-muted-foreground">ราคารวม</dt>
-                  <dd>
-                    <PriceWithDiscount
-                      regular={result.referenceTotal}
-                      discounted={result.discountedTotal}
-                      size="lg"
-                    />
-                  </dd>
-                </div>
-                {result.totalSavings > 0 && (
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-muted-foreground">ประหยัดได้</dt>
-                    <dd className="font-medium text-primary">
-                      {formatBahtInt(result.totalSavings)}
-                    </dd>
-                  </div>
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
+            <CardTitle className="text-lg">สรุปผล</CardTitle>
+            <CalculatorOrderButton
+              orderPayload={{
+                kind: "coupon",
+                selections,
+                inventory,
+              }}
+              previewTotals={{
+                totalButtons: result.totalButtons,
+                totalPrice: result.discountedTotal,
+              }}
+            />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="mb-3 text-sm font-semibold">รายละเอียดการใช้คูปอง</p>
+              <div
+                className={cn(
+                  "mb-2 grid grid-cols-[minmax(0,1fr)_6rem_2.5rem] gap-x-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground sm:grid-cols-[minmax(0,1fr)_7rem_3rem] sm:gap-x-3",
                 )}
-              </dl>
-
-              <Separator />
-
-              <div className="space-y-2 text-sm">
-                <p className="font-semibold">การใช้คูปอง</p>
-                <p className="text-muted-foreground">
-                  10% ใช้: {result.couponUsage.discount10Used}
-                </p>
-                <p className="text-muted-foreground">
-                  3% ใช้: {result.couponUsage.discount3Used}
-                </p>
+              >
+                <span>แพ็ก</span>
+                <span>คูปองที่ใช้</span>
+                <span className="text-right">จำนวน</span>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <ul className="divide-y divide-brand-blush/40 rounded-xl border border-brand-blush/40 bg-white/80">
+                {aggregateCouponDisplayLines(result.lines).map((line, index) => (
+                  <li
+                    key={`${line.buttons}-${line.couponLabel}-${index}`}
+                    className="grid grid-cols-[minmax(0,1fr)_6rem_2.5rem] items-center gap-x-2 px-3 py-2.5 text-sm sm:grid-cols-[minmax(0,1fr)_7rem_3rem] sm:gap-x-3 sm:px-4"
+                  >
+                    <div className="min-w-0">
+                      <ButtonAmount value={line.buttons} size="sm" highlight />
+                    </div>
+                    <span className="text-xs font-medium text-foreground sm:text-sm">
+                      {line.couponLabel}
+                    </span>
+                    <span className="text-right tabular-nums text-muted-foreground">
+                      ×{line.quantity}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {(result.couponUsage.discount10Used > 0 ||
+                result.couponUsage.discount3Used > 0) && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  ใช้คูปอง 10%: {result.couponUsage.discount10Used} ใบ · คูปอง 3%:{" "}
+                  {result.couponUsage.discount3Used} ใบ
+                </p>
+              )}
+            </div>
+
+            <Separator />
+
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">กระดุมรวม</dt>
+                <dd>
+                  <ButtonAmount
+                    value={result.totalButtons}
+                    size="sm"
+                    highlight
+                  />
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">ยอดเติมสะสมรวม</dt>
+                <dd>
+                  <ButtonAmount value={result.totalTopup} suffix={false} size="sm" />
+                </dd>
+              </div>
+              {result.totalSavings > 0 && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">ประหยัดได้</dt>
+                  <dd className="font-medium text-primary">
+                    {formatBahtInt(result.totalSavings)}
+                  </dd>
+                </div>
+              )}
+              <div className="flex items-center justify-between gap-4 border-t border-brand-blush/40 pt-2">
+                <dt className="text-base font-semibold">ราคารวม</dt>
+                <dd>
+                  <PriceWithDiscount
+                    regular={result.referenceTotal}
+                    discounted={result.discountedTotal}
+                    size="lg"
+                  />
+                </dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -710,7 +740,6 @@ export function PackageCalculatorPage({
             onChange={setBudgetInput}
             results={budgetResults}
             emphasis="budget"
-            budget={budgetAmount}
             emptyMessage="ไม่พบชุดแพ็กเกจที่เหมาะกับงบนี้"
             isCalculating={isBudgetCalculating}
           />

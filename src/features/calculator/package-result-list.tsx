@@ -17,16 +17,12 @@ type PackageResultListProps = {
   title: string;
   combinations: PackageCombination[];
   emptyMessage: string;
-  requiredButtons?: number;
-  showRemainingBudget?: boolean;
 };
 
 export function PackageResultList({
   title,
   combinations,
   emptyMessage,
-  requiredButtons,
-  showRemainingBudget = false,
 }: PackageResultListProps) {
   const top = pickTopSkinRecommendations(combinations, TOP_CALCULATOR_RESULTS);
 
@@ -48,16 +44,9 @@ export function PackageResultList({
             key={`${combination.groupId}-${index}`}
             combination={combination}
             rank={index + 1}
-            requiredButtons={requiredButtons}
-            showRemainingBudget={showRemainingBudget}
           />
         ))}
       </div>
-      {combinations.length > TOP_CALCULATOR_RESULTS && (
-        <p className="text-xs text-muted-foreground">
-          แสดง {TOP_CALCULATOR_RESULTS} รายการแรกจากทั้งหมด {combinations.length} ชุด
-        </p>
-      )}
     </section>
   );
 }

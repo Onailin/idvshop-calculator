@@ -68,4 +68,17 @@ export const messages = {
   sitePopupDeleteFailed: "ลบป๊อปอัพไม่สำเร็จ",
   sitePopupEnabled: "เปิดใช้งานป๊อปอัพแล้ว",
   sitePopupDisabled: "ปิดใช้งานป๊อปอัพแล้ว",
+
+  orderCreated: "สร้างออเดอร์สำเร็จ",
+  orderCreateFailed: "สร้างออเดอร์ไม่สำเร็จ",
+  orderNotFound: "ไม่พบออเดอร์",
+  orderCompleted: "อัปเดตออเดอร์เป็นเติมแล้ว",
+  orderCancelled: "ยกเลิกออเดอร์แล้ว",
+  orderUpdateFailed: "อัปเดตออเดอร์ไม่สำเร็จ",
+  orderAlreadyProcessed: "ออเดอร์นี้ดำเนินการไปแล้ว",
+  orderCleared: "ลบออเดอร์ออกจากรายการแล้ว",
+  orderClearFailed: "ลบออเดอร์ไม่สำเร็จ",
+  orderCannotClearPending: "ไม่สามารถเคลียร์ออเดอร์ที่ยังรอดำเนินการได้",
+  ordersCleared: "ลบออเดอร์ที่เลือกแล้ว",
+  ordersClearNoneSelected: "กรุณาเลือกออเดอร์ที่ต้องการเคลียร์",
 } as const;

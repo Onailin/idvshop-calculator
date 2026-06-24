@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   AppWindow,
   Boxes,
+  ClipboardList,
   FolderOpen,
   ImageIcon,
   LayoutDashboard,
@@ -22,6 +23,7 @@ import { signOut } from "next-auth/react";
 
 const baseNavItems = [
   { href: "/admin", label: "แดชบอร์ด", icon: LayoutDashboard },
+  { href: "/admin/orders", label: "ออเดอร์", icon: ClipboardList },
   { href: "/admin/categories", label: "หมวดหมู่", icon: FolderOpen },
   { href: "/admin/items", label: "รายการไอเทม", icon: Package },
   { href: "/admin/packages", label: "แพ็กเกจ", icon: Boxes },
@@ -40,9 +42,9 @@ export function AdminSidebar({ role, username }: AdminSidebarProps) {
 
   const navItems = isSuperAdmin(role)
     ? [
-        ...baseNavItems.slice(0, 4),
+        ...baseNavItems.slice(0, 5),
         { href: "/admin/admins", label: "จัดการแอดมิน", icon: Shield },
-        ...baseNavItems.slice(4),
+        ...baseNavItems.slice(5),
       ]
     : baseNavItems;
 

@@ -30,6 +30,17 @@ enum Rarity {
   C
 }
 
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderChannel {
+  FACEBOOK
+  LINE
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String   @unique
@@ -116,6 +127,38 @@ model SitePopup {
   images        SitePopupImage[]
 
   @@index([isActive])
+}
+
+model Order {
+  id           String       @id @default(cuid())
+  trackCode    String       @unique
+  totalButtons Int
+  totalPrice   Int
+  channel      OrderChannel
+  status       OrderStatus  @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  lines        OrderLine[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderLine {
+  id               String   @id @default(cuid())
+  orderId          String
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  packageId        String?
+  packageGroupName String
+  buttons          Int
+  topupAmount      Int?
+  price            Int
+  quantity         Int
+  lineTotal        Int
+  couponLabel      String?
+  createdAt        DateTime @default(now())
+
+  @@index([orderId])
 }
 
 model SitePopupImage {

@@ -8,7 +8,6 @@ import { ButtonAmount } from "@/components/ui/button-amount";
 import { formatRarity, RARITY_COLORS } from "@/lib/rarity";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalculatorOrderButton } from "@/features/calculator/calculator-order-button";
 import { QuantityStepper } from "@/features/calculator/quantity-stepper";
 import type { Rarity } from "@prisma/client";
 
@@ -43,7 +42,6 @@ export function PriceSummary({
     <Card className="sticky top-[3.75rem] border-0 bg-white shadow-sm ring-1 ring-black/[0.04]">
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0 pb-3">
         <CardTitle className="text-lg">สรุปที่เลือก</CardTitle>
-        {!isEmpty && <CalculatorOrderButton />}
       </CardHeader>
       <CardContent className="space-y-4">
         {isEmpty ? (

@@ -1,11 +1,10 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
-import { ButtonAmount, ButtonBreakdown } from "@/components/ui/button-amount";
+import { ButtonAmount } from "@/components/ui/button-amount";
 import { CalculatorOrderButton } from "@/features/calculator/calculator-order-button";
-import { cn, formatBahtInt } from "@/lib/utils";
 import { getCombinationTopupTotal } from "@/services/packageOptimizer";
-import type { PackageCombination, PackageLineItem } from "@/types/package";
+import { formatBahtInt } from "@/lib/utils";
+import type { PackageCombination } from "@/types/package";
 import type { ReactNode } from "react";
 
 export type CalculatorEmphasis = "budget" | "buttons" | "topup";
@@ -14,55 +13,7 @@ type CalculatorCombinationCardProps = {
   combination: PackageCombination;
   rank?: number;
   emphasis?: CalculatorEmphasis;
-  budget?: number;
 };
-
-function getTopupPerUnit(item: PackageLineItem): number {
-  return item.topupAmount ?? item.buttons;
-}
-
-const PACKAGE_LINE_GRID =
-  "grid grid-cols-[minmax(0,1fr)_2.75rem_4.5rem] items-start gap-x-2 sm:grid-cols-[minmax(0,1fr)_3rem_5rem] sm:gap-x-3";
-
-function PackageLineHeader() {
-  return (
-    <div
-      className={cn(
-        PACKAGE_LINE_GRID,
-        "mb-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground",
-      )}
-    >
-      <span>แพ็ก</span>
-      <span className="text-right">จำนวน</span>
-      <span className="text-right">ราคา</span>
-    </div>
-  );
-}
-
-function PackageLine({ item }: { item: PackageLineItem }) {
-  const topup = getTopupPerUnit(item);
-  const lineTotal = item.price * item.quantity;
-
-  return (
-    <li className={cn(PACKAGE_LINE_GRID, "text-sm")}>
-      <div className="min-w-0">
-        <p className="flex flex-wrap items-center gap-x-2 font-medium">
-          <ButtonAmount value={item.buttons} size="sm" highlight />
-          <span className="text-foreground">· {formatBahtInt(item.price)}</span>
-        </p>
-        <p className="text-muted-foreground">
-          <ButtonBreakdown topup={topup} buttons={item.buttons} />
-        </p>
-      </div>
-      <span className="pt-0.5 text-right tabular-nums text-muted-foreground">
-        ×{item.quantity}
-      </span>
-      <span className="pt-0.5 text-right tabular-nums font-medium text-foreground">
-        {formatBahtInt(lineTotal)}
-      </span>
-    </li>
-  );
-}
 
 function StatRow({
   label,
@@ -94,11 +45,16 @@ export function CalculatorCombinationCard({
   combination,
   rank,
   emphasis = "budget",
-  budget,
 }: CalculatorCombinationCardProps) {
   const totalTopup = getCombinationTopupTotal(combination);
-  const remainingBudget =
-    budget !== undefined ? Math.max(0, budget - combination.totalPrice) : null;
+  const orderPayload = {
+    kind: "combination" as const,
+    groupId: combination.groupId,
+    items: combination.items.map((item) => ({
+      packageId: item.packageId,
+      quantity: item.quantity,
+    })),
+  };
 
   const stats = {
     price: {
@@ -143,7 +99,13 @@ export function CalculatorCombinationCard({
             </p>
           )}
         </div>
-        <CalculatorOrderButton />
+        <CalculatorOrderButton
+          orderPayload={orderPayload}
+          previewTotals={{
+            totalButtons: combination.totalButtons,
+            totalPrice: combination.totalPrice,
+          }}
+        />
       </div>
 
       <div className="mt-3 space-y-2">
@@ -152,9 +114,9 @@ export function CalculatorCombinationCard({
             key={key}
             label={stats[key].label}
             value={stats[key].value}
-            highlight={index === 0 && key !== "buttons"}
+            highlight={index === 0 && key !== "buttons" && key !== "topup"}
             valueClassName={
-              key === "buttons"
+              key === "buttons" || key === "topup"
                 ? undefined
                 : index === 0
                   ? "text-lg font-bold"
@@ -163,22 +125,6 @@ export function CalculatorCombinationCard({
           />
         ))}
       </div>
-
-      {remainingBudget !== null && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          งบเหลือ {formatBahtInt(remainingBudget)}
-        </p>
-      )}
-
-      <Separator className="my-4" />
-
-      <p className="mb-2 text-sm font-semibold">รายละเอียดแพ็กเกจ</p>
-      <PackageLineHeader />
-      <ul className="space-y-2">
-        {combination.items.map((item) => (
-          <PackageLine key={`${item.packageId}-${item.quantity}`} item={item} />
-        ))}
-      </ul>
     </article>
   );
 }

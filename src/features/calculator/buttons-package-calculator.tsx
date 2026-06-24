@@ -117,7 +117,6 @@ export function ButtonsPackageCalculator({
             title="แพ็กเกจที่คุ้มที่สุด"
             combinations={itemResults}
             emptyMessage="ไม่พบชุดแพ็กเกจที่เพียงพอ"
-            requiredButtons={requiredFromItems}
           />
         </>
       )}
