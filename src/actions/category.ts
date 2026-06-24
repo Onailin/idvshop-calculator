@@ -10,13 +10,18 @@ import { messages } from "@/lib/messages";
 import { categorySchema } from "@/validators/category";
 import type { ActionResult } from "@/types";
 
-export async function getCategories() {
+export async function getCategories(options?: { orderBy?: "name" | "newest" }) {
   disableRequestCache();
+
+  const orderBy =
+    options?.orderBy === "newest"
+      ? { createdAt: "desc" as const }
+      : { name: "asc" as const };
 
   const { data } = await safeQuery(
     () =>
       prisma.category.findMany({
-        orderBy: { name: "asc" },
+        orderBy,
         include: {
           _count: { select: { items: true } },
         },

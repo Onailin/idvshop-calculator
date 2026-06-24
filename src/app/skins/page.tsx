@@ -17,7 +17,7 @@ export default async function SkinsPage() {
   const [items, categories, packages, packageGroups, dbConnected] =
     await Promise.all([
       getItemsForCalculator(),
-      getCategories(),
+      getCategories({ orderBy: "newest" }),
       getPackagesForCalculator(),
       getActivePackageGroupsForCalculator(),
       isDatabaseConnected(),
