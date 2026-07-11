@@ -1,4 +1,9 @@
-import type { OrderChannel, OrderStatus } from "@prisma/client";
+import type {
+  ItemType,
+  OrderChannel,
+  OrderStatus,
+  Rarity,
+} from "@prisma/client";
 
 export type CustomerOrderSummary = {
   trackCode: string;
@@ -7,16 +12,23 @@ export type CustomerOrderSummary = {
   channel: OrderChannel;
 };
 
+export type OrderSelectedItem = {
+  itemId: string;
+  quantity: number;
+};
+
 export type OrderPayload =
   | {
       kind: "combination";
       groupId: string;
       items: Array<{ packageId: string; quantity: number }>;
+      selectedItems?: OrderSelectedItem[];
     }
   | {
       kind: "coupon";
       selections: Array<{ packageId: string; quantity: number }>;
       inventory: { discount10: number; discount3: number };
+      selectedItems?: OrderSelectedItem[];
     };
 
 export type AdminOrderListItem = {
@@ -28,6 +40,18 @@ export type AdminOrderListItem = {
   status: OrderStatus;
   createdAt: Date;
   lineCount: number;
+};
+
+export type AdminOrderDetailItem = {
+  id: string;
+  itemId: string | null;
+  name: string;
+  type: ItemType;
+  rarity: Rarity;
+  buttonCost: number;
+  imageUrl: string | null;
+  categoryName: string | null;
+  quantity: number;
 };
 
 export type AdminOrderDetail = {
@@ -50,4 +74,5 @@ export type AdminOrderDetail = {
     lineTotal: number;
     couponLabel: string | null;
   }>;
+  items: AdminOrderDetailItem[];
 };

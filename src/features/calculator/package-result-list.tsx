@@ -5,6 +5,7 @@ import { PackageBillCard } from "@/features/calculator/package-bill-card";
 import { TOP_CALCULATOR_RESULTS } from "@/lib/calculator-constants";
 import { pickTopSkinRecommendations } from "@/services/packageOptimizer";
 import type { PackageCombination } from "@/types/package";
+import type { OrderSelectedItem } from "@/types/order";
 
 export { TOP_CALCULATOR_RESULTS as TOP_RESULTS };
 
@@ -17,12 +18,14 @@ type PackageResultListProps = {
   title: string;
   combinations: PackageCombination[];
   emptyMessage: string;
+  selectedItems?: OrderSelectedItem[];
 };
 
 export function PackageResultList({
   title,
   combinations,
   emptyMessage,
+  selectedItems,
 }: PackageResultListProps) {
   const top = pickTopSkinRecommendations(combinations, TOP_CALCULATOR_RESULTS);
 
@@ -44,6 +47,7 @@ export function PackageResultList({
             key={`${combination.groupId}-${index}`}
             combination={combination}
             rank={index + 1}
+            selectedItems={selectedItems}
           />
         ))}
       </div>

@@ -117,6 +117,10 @@ export function ButtonsPackageCalculator({
             title="แพ็กเกจที่คุ้มที่สุด"
             combinations={itemResults}
             emptyMessage="ไม่พบชุดแพ็กเกจที่เพียงพอ"
+            selectedItems={selectedItems.map((item) => ({
+              itemId: item.id,
+              quantity: item.quantity,
+            }))}
           />
         </>
       )}

@@ -71,6 +71,7 @@ export const messages = {
 
   orderCreated: "สร้างออเดอร์สำเร็จ",
   orderCreateFailed: "สร้างออเดอร์ไม่สำเร็จ",
+  orderItemNotFound: "ไม่พบไอเทมที่เลือกในระบบ",
   orderNotFound: "ไม่พบออเดอร์",
   orderCompleted: "อัปเดตออเดอร์เป็นเติมแล้ว",
   orderCancelled: "ยกเลิกออเดอร์แล้ว",

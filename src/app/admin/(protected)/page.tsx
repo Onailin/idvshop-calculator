@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 
-import { FolderOpen, Package, Boxes } from "lucide-react";
+import { Banknote, Boxes, FolderOpen, Package, ShoppingBag } from "lucide-react";
 import { getDashboardStats } from "@/actions/dashboard";
 import { DashboardCharts } from "@/features/admin/dashboard-charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatBahtInt } from "@/lib/utils";
 
 export default async function AdminDashboardPage() {
   const stats = await getDashboardStats();
@@ -17,7 +18,29 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">ยอดขาย (เติมแล้ว)</CardTitle>
+            <Banknote className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tracking-tight sm:text-3xl">
+              {formatBahtInt(stats.totalCompletedRevenue)}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">ออเดอร์เติมแล้ว</CardTitle>
+            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.completedOrderCount}</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">รายการทั้งหมด</CardTitle>

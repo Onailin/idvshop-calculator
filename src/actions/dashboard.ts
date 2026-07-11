@@ -15,10 +15,12 @@ import type {
   DashboardChartPoint,
   DashboardCharts,
   DashboardMonthlyPoint,
+  DashboardSalesMonthlyPoint,
   DashboardStats,
 } from "@/types";
 
 const MONTHS_TO_SHOW = 6;
+const TOP_SOLD_LIMIT = 8;
 
 function buildMonthBuckets(): { key: string; label: string }[] {
   const buckets: { key: string; label: string }[] = [];
@@ -46,6 +48,11 @@ function mapWithPalette(
   }));
 }
 
+function truncateLabel(label: string, max = 22): string {
+  if (label.length <= max) return label;
+  return `${label.slice(0, max - 1)}…`;
+}
+
 export async function getDashboardStats(): Promise<DashboardStats> {
   await requireAdmin();
 
@@ -60,12 +67,16 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalCategories,
     totalPackages,
     totalPackageGroups,
+    completedOrdersAgg,
     itemsByTypeRaw,
     itemsByCategoryRaw,
     itemsByRarityRaw,
     packagesByGroupRaw,
     itemsWithImage,
     recentItems,
+    completedOrdersRecent,
+    topSoldItemsRaw,
+    topSoldPackagesRaw,
     categories,
     packageGroups,
   ] = await Promise.all([
@@ -73,6 +84,11 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     prisma.category.count(),
     prisma.package.count(),
     prisma.packageGroup.count(),
+    prisma.order.aggregate({
+      where: { status: "COMPLETED" },
+      _sum: { totalPrice: true },
+      _count: { id: true },
+    }),
     prisma.item.groupBy({
       by: ["type"],
       _count: { id: true },
@@ -98,6 +114,27 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       where: { createdAt: { gte: monthStart } },
       select: { createdAt: true },
     }),
+    prisma.order.findMany({
+      where: {
+        status: "COMPLETED",
+        updatedAt: { gte: monthStart },
+      },
+      select: { totalPrice: true, updatedAt: true },
+    }),
+    prisma.orderItem.groupBy({
+      by: ["name"],
+      where: { order: { status: "COMPLETED" } },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take: TOP_SOLD_LIMIT,
+    }),
+    prisma.orderLine.groupBy({
+      by: ["packageGroupName", "buttons"],
+      where: { order: { status: "COMPLETED" } },
+      _sum: { quantity: true },
+      orderBy: { _sum: { quantity: "desc" } },
+      take: TOP_SOLD_LIMIT,
+    }),
     prisma.category.findMany({
       select: { id: true, name: true },
     }),
@@ -111,6 +148,26 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   );
   const groupNameById = new Map(
     packageGroups.map((group) => [group.id, group.name]),
+  );
+
+  const topSoldItems = mapWithPalette(
+    topSoldItemsRaw
+      .map((row) => ({
+        name: truncateLabel(row.name),
+        value: row._sum.quantity ?? 0,
+      }))
+      .filter((point) => point.value > 0),
+  );
+
+  const topSoldPackages = mapWithPalette(
+    topSoldPackagesRaw
+      .map((row) => ({
+        name: truncateLabel(
+          `${row.packageGroupName} · ${row.buttons.toLocaleString("th-TH")} กระดุม`,
+        ),
+        value: row._sum.quantity ?? 0,
+      }))
+      .filter((point) => point.value > 0),
   );
 
   const itemsByType: DashboardChartPoint[] = itemsByTypeRaw
@@ -177,7 +234,31 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     count: monthCountMap.get(bucket.key) ?? 0,
   }));
 
+  const monthRevenueMap = new Map<string, { revenue: number; orderCount: number }>();
+  for (const bucket of monthBuckets) {
+    monthRevenueMap.set(bucket.key, { revenue: 0, orderCount: 0 });
+  }
+  for (const order of completedOrdersRecent) {
+    const key = `${order.updatedAt.getFullYear()}-${String(order.updatedAt.getMonth() + 1).padStart(2, "0")}`;
+    const current = monthRevenueMap.get(key);
+    if (current) {
+      current.revenue += order.totalPrice;
+      current.orderCount += 1;
+    }
+  }
+  const salesByMonth: DashboardSalesMonthlyPoint[] = monthBuckets.map((bucket) => {
+    const point = monthRevenueMap.get(bucket.key) ?? { revenue: 0, orderCount: 0 };
+    return {
+      month: bucket.label,
+      revenue: point.revenue,
+      orderCount: point.orderCount,
+    };
+  });
+
   const charts: DashboardCharts = {
+    salesByMonth,
+    topSoldItems,
+    topSoldPackages,
     itemsByType,
     itemsByCategory,
     itemsByRarity,
@@ -191,6 +272,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalCategories,
     totalPackages,
     totalPackageGroups,
+    totalCompletedRevenue: completedOrdersAgg._sum.totalPrice ?? 0,
+    completedOrderCount: completedOrdersAgg._count.id,
     charts,
   };
 }

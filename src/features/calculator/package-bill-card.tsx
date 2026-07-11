@@ -5,15 +5,18 @@ import { CalculatorOrderButton } from "@/features/calculator/calculator-order-bu
 import { getCombinationTopupTotal } from "@/services/packageOptimizer";
 import { formatBahtInt } from "@/lib/utils";
 import type { PackageCombination } from "@/types/package";
+import type { OrderSelectedItem } from "@/types/order";
 
 type PackageBillCardProps = {
   combination: PackageCombination;
   rank?: number;
+  selectedItems?: OrderSelectedItem[];
 };
 
 export function PackageBillCard({
   combination,
   rank,
+  selectedItems,
 }: PackageBillCardProps) {
   const totalTopup = getCombinationTopupTotal(combination);
   const orderPayload = {
@@ -23,6 +26,7 @@ export function PackageBillCard({
       packageId: item.packageId,
       quantity: item.quantity,
     })),
+    selectedItems,
   };
 
   return (

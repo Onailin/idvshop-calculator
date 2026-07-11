@@ -139,6 +139,7 @@ model Order {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   lines        OrderLine[]
+  items        OrderItem[]
 
   @@index([status])
   @@index([createdAt])
@@ -157,6 +158,23 @@ model OrderLine {
   lineTotal        Int
   couponLabel      String?
   createdAt        DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId       String?
+  name         String
+  type         ItemType
+  rarity       Rarity
+  buttonCost   Int
+  imageUrl     String?
+  categoryName String?
+  quantity     Int
+  createdAt    DateTime @default(now())
 
   @@index([orderId])
 }

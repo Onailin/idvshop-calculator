@@ -1,3 +1,4 @@
+import type { ItemType, Rarity } from "@prisma/client";
 import type { PackageInput } from "@/types/package";
 import {
   calculateOptimalCouponAllocation,
@@ -21,6 +22,59 @@ export type BuiltOrderSnapshot = {
   totalPrice: number;
   lines: OrderLineSnapshot[];
 };
+
+export type OrderItemSnapshot = {
+  itemId: string;
+  name: string;
+  type: ItemType;
+  rarity: Rarity;
+  buttonCost: number;
+  imageUrl: string | null;
+  categoryName: string | null;
+  quantity: number;
+};
+
+type DbItem = {
+  id: string;
+  name: string;
+  type: ItemType;
+  rarity: Rarity;
+  buttonCost: number;
+  imageUrl: string | null;
+  category: { name: string };
+};
+
+export function buildOrderItemSnapshots(
+  selectedItems: Array<{ itemId: string; quantity: number }> | undefined,
+  items: DbItem[],
+): OrderItemSnapshot[] | { error: string } {
+  if (!selectedItems || selectedItems.length === 0) {
+    return [];
+  }
+
+  const itemById = new Map(items.map((item) => [item.id, item]));
+  const snapshots: OrderItemSnapshot[] = [];
+
+  for (const selection of selectedItems) {
+    const item = itemById.get(selection.itemId);
+    if (!item) {
+      return { error: "ไม่พบไอเทมที่เลือกในระบบ" };
+    }
+
+    snapshots.push({
+      itemId: item.id,
+      name: item.name,
+      type: item.type,
+      rarity: item.rarity,
+      buttonCost: item.buttonCost,
+      imageUrl: item.imageUrl,
+      categoryName: item.category.name,
+      quantity: selection.quantity,
+    });
+  }
+
+  return snapshots;
+}
 
 type DbPackage = {
   id: string;

@@ -5,6 +5,13 @@ const packageSelectionSchema = z.object({
   quantity: z.number().int().min(1).max(999),
 });
 
+const selectedItemSchema = z.object({
+  itemId: z.string().min(1),
+  quantity: z.number().int().min(1).max(999),
+});
+
+const selectedItemsSchema = z.array(selectedItemSchema).max(100).optional();
+
 const couponInventorySchema = z.object({
   discount10: z.number().int().min(0).max(999),
   discount3: z.number().int().min(0).max(999),
@@ -15,6 +22,7 @@ export const createCombinationOrderSchema = z.object({
   channel: z.enum(["FACEBOOK", "LINE"]),
   groupId: z.string().min(1),
   items: z.array(packageSelectionSchema).min(1).max(50),
+  selectedItems: selectedItemsSchema,
 });
 
 export const createCouponOrderSchema = z.object({
@@ -22,6 +30,7 @@ export const createCouponOrderSchema = z.object({
   channel: z.enum(["FACEBOOK", "LINE"]),
   selections: z.array(packageSelectionSchema).min(1).max(50),
   inventory: couponInventorySchema,
+  selectedItems: selectedItemsSchema,
 });
 
 export const createOrderSchema = z.discriminatedUnion("kind", [

@@ -5,6 +5,7 @@ import { CalculatorOrderButton } from "@/features/calculator/calculator-order-bu
 import { getCombinationTopupTotal } from "@/services/packageOptimizer";
 import { formatBahtInt } from "@/lib/utils";
 import type { PackageCombination } from "@/types/package";
+import type { OrderSelectedItem } from "@/types/order";
 import type { ReactNode } from "react";
 
 export type CalculatorEmphasis = "budget" | "buttons" | "topup";
@@ -13,6 +14,7 @@ type CalculatorCombinationCardProps = {
   combination: PackageCombination;
   rank?: number;
   emphasis?: CalculatorEmphasis;
+  selectedItems?: OrderSelectedItem[];
 };
 
 function StatRow({
@@ -45,6 +47,7 @@ export function CalculatorCombinationCard({
   combination,
   rank,
   emphasis = "budget",
+  selectedItems,
 }: CalculatorCombinationCardProps) {
   const totalTopup = getCombinationTopupTotal(combination);
   const orderPayload = {
@@ -54,6 +57,7 @@ export function CalculatorCombinationCard({
       packageId: item.packageId,
       quantity: item.quantity,
     })),
+    selectedItems,
   };
 
   const stats = {

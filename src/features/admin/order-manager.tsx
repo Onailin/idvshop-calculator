@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ItemThumbnail } from "@/components/ui/item-thumbnail";
 import {
   Select,
   SelectContent,
@@ -31,11 +32,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatItemType } from "@/lib/item-type";
 import {
   formatOrderChannel,
   formatOrderStatus,
   getOrderTotalTopup,
 } from "@/lib/order-format";
+import { formatRarity, RARITY_COLORS } from "@/lib/rarity";
 import { cn, formatBahtInt } from "@/lib/utils";
 import type { AdminOrderDetail, AdminOrderListItem } from "@/types/order";
 
@@ -620,6 +623,74 @@ export function OrderManager({ initialOrders }: OrderManagerProps) {
                     {formatBahtInt(detail.totalPrice)}
                   </p>
                 </div>
+              </div>
+
+              <div>
+                <p className="mb-3 text-sm font-semibold">
+                  ไอเทม / สกินที่ลูกค้าเลือก
+                </p>
+                {detail.items.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-brand-blush/40 bg-white px-3 py-4 text-sm text-muted-foreground">
+                    ออเดอร์นี้ไม่มีรายการไอเทม — ออเดอร์ที่สร้างก่อนระบบบันทึกไอเทม
+                    ไม่สามารถดึงรายละเอียดย้อนหลังได้
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {detail.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-xl border border-brand-blush/40 bg-white p-3 text-sm"
+                      >
+                        <div className="flex items-start gap-3">
+                          <ItemThumbnail
+                            src={item.imageUrl}
+                            alt={item.name}
+                            variant="admin"
+                            className="rounded-lg bg-brand-cream/40"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="font-medium">{item.name}</p>
+                                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+                                  <Badge
+                                    className={cn(
+                                      "shrink-0 text-[10px]",
+                                      RARITY_COLORS[item.rarity] ??
+                                        "bg-slate-500 text-white",
+                                    )}
+                                  >
+                                    {formatRarity(item.rarity)}
+                                  </Badge>
+                                  <span>{formatItemType(item.type)}</span>
+                                  {item.categoryName && (
+                                    <>
+                                      <span>·</span>
+                                      <span>{item.categoryName}</span>
+                                    </>
+                                  )}
+                                </p>
+                              </div>
+                              <ButtonAmount
+                                value={item.buttonCost * item.quantity}
+                                size="sm"
+                                highlight
+                              />
+                            </div>
+                            <p className="mt-2 text-muted-foreground">
+                              จำนวน ×{item.quantity} ·{" "}
+                              <ButtonAmount
+                                value={item.buttonCost}
+                                size="xs"
+                              />{" "}
+                              / ชิ้น
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>

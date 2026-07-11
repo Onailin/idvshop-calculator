@@ -9,6 +9,7 @@ import { messages } from "@/lib/messages";
 import {
   buildCombinationOrderSnapshot,
   buildCouponOrderSnapshot,
+  buildOrderItemSnapshots,
 } from "@/services/order-builder";
 import type { ActionResult } from "@/types";
 import type {
@@ -64,6 +65,29 @@ async function fetchActivePackages() {
   });
 }
 
+async function fetchSelectedItems(
+  selectedItems: Array<{ itemId: string; quantity: number }> | undefined,
+) {
+  if (!selectedItems || selectedItems.length === 0) {
+    return [];
+  }
+
+  const itemIds = [...new Set(selectedItems.map((item) => item.itemId))];
+
+  return prisma.item.findMany({
+    where: { id: { in: itemIds } },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      rarity: true,
+      buttonCost: true,
+      imageUrl: true,
+      category: { select: { name: true } },
+    },
+  });
+}
+
 export async function createOrder(
   input: unknown,
 ): Promise<ActionResult<CustomerOrderSummary>> {
@@ -91,6 +115,16 @@ export async function createOrder(
       return { success: false, message: snapshot.error };
     }
 
+    const catalogItems = await fetchSelectedItems(parsed.data.selectedItems);
+    const itemSnapshots = buildOrderItemSnapshots(
+      parsed.data.selectedItems,
+      catalogItems,
+    );
+
+    if ("error" in itemSnapshots) {
+      return { success: false, message: messages.orderItemNotFound };
+    }
+
     const channel = parsed.data.channel as OrderChannel;
 
     for (let attempt = 0; attempt < MAX_TRACK_CODE_ATTEMPTS; attempt += 1) {
@@ -113,6 +147,18 @@ export async function createOrder(
                 quantity: line.quantity,
                 lineTotal: line.lineTotal,
                 couponLabel: line.couponLabel,
+              })),
+            },
+            items: {
+              create: itemSnapshots.map((item) => ({
+                itemId: item.itemId,
+                name: item.name,
+                type: item.type,
+                rarity: item.rarity,
+                buttonCost: item.buttonCost,
+                imageUrl: item.imageUrl,
+                categoryName: item.categoryName,
+                quantity: item.quantity,
               })),
             },
           },
@@ -183,6 +229,9 @@ export async function getAdminOrderDetail(
       lines: {
         orderBy: { createdAt: "asc" },
       },
+      items: {
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
@@ -209,6 +258,17 @@ export async function getAdminOrderDetail(
       quantity: line.quantity,
       lineTotal: line.lineTotal,
       couponLabel: line.couponLabel,
+    })),
+    items: order.items.map((item) => ({
+      id: item.id,
+      itemId: item.itemId,
+      name: item.name,
+      type: item.type,
+      rarity: item.rarity,
+      buttonCost: item.buttonCost,
+      imageUrl: item.imageUrl,
+      categoryName: item.categoryName,
+      quantity: item.quantity,
     })),
   };
 }
@@ -238,6 +298,7 @@ export async function markOrderCompleted(
     });
 
     revalidatePath("/admin/orders");
+    revalidatePath("/admin");
 
     return { success: true, message: messages.orderCompleted };
   } catch {
@@ -270,6 +331,7 @@ export async function markOrderCancelled(
     });
 
     revalidatePath("/admin/orders");
+    revalidatePath("/admin");
 
     return { success: true, message: messages.orderCancelled };
   } catch {
@@ -295,6 +357,7 @@ export async function clearOrder(orderId: string): Promise<ActionResult> {
     });
 
     revalidatePath("/admin/orders");
+    revalidatePath("/admin");
 
     return { success: true, message: messages.orderCleared };
   } catch {
@@ -327,6 +390,7 @@ export async function clearOrders(
     }
 
     revalidatePath("/admin/orders");
+    revalidatePath("/admin");
 
     return {
       success: true,

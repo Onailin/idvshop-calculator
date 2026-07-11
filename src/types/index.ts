@@ -52,6 +52,8 @@ export type DashboardStats = {
   totalCategories: number;
   totalPackages: number;
   totalPackageGroups: number;
+  totalCompletedRevenue: number;
+  completedOrderCount: number;
   charts: DashboardCharts;
 };
 
@@ -66,7 +68,16 @@ export type DashboardMonthlyPoint = {
   count: number;
 };
 
+export type DashboardSalesMonthlyPoint = {
+  month: string;
+  revenue: number;
+  orderCount: number;
+};
+
 export type DashboardCharts = {
+  salesByMonth: DashboardSalesMonthlyPoint[];
+  topSoldItems: DashboardChartPoint[];
+  topSoldPackages: DashboardChartPoint[];
   itemsByType: DashboardChartPoint[];
   itemsByCategory: DashboardChartPoint[];
   itemsByRarity: DashboardChartPoint[];
