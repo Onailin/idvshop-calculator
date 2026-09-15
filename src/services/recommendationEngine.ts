@@ -1,4 +1,3 @@
-import { MAX_CALCULATOR_AMOUNT } from "@/lib/calculator-constants";
 import {
   findOptimalRequirementCombination,
   findTopRequirementCombinations,
@@ -132,10 +131,8 @@ function generateBudgetCombinations(grouped: GroupedPackages, budget: number) {
 }
 
 function generateTopupCombinations(grouped: GroupedPackages, requiredTopup: number) {
-  if (requiredTopup > MAX_CALCULATOR_AMOUNT) {
-    return [];
-  }
-
+  const shouldEnumerate =
+    requiredTopup <= PACKAGE_OPTIMIZER_LIMITS.fullEnumerationMaxButtons;
   const allCombinations: PackageCombination[] = [];
   const candidateLimit = PACKAGE_OPTIMIZER_LIMITS.requirementCandidateLimit;
 
@@ -148,6 +145,10 @@ function generateTopupCombinations(grouped: GroupedPackages, requiredTopup: numb
       candidateLimit,
     );
     allCombinations.push(...topCombinations);
+
+    if (!shouldEnumerate) {
+      continue;
+    }
 
     const enumerated = generateCombinations(group.packages, {
       groupId: group.groupId,

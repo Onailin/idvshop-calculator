@@ -1,8 +1,5 @@
 export const TOP_CALCULATOR_RESULTS = 1;
 
-/** จำกัดยอดสูงสุดที่คำนวณได้ — กันเบราว์เซอร์ค้าง */
-export const MAX_CALCULATOR_AMOUNT = 500_000;
-
 export const MAX_CALCULATOR_INPUT_DIGITS = 7;
 
 export function sanitizeCalculatorAmountInput(value: string): string {
@@ -16,10 +13,6 @@ export function sanitizeCalculatorAmountInput(value: string): string {
     return "";
   }
 
-  if (numeric > MAX_CALCULATOR_AMOUNT) {
-    return String(MAX_CALCULATOR_AMOUNT);
-  }
-
   return digits;
 }
 
@@ -28,5 +21,5 @@ export function clampCalculatorAmount(amount: number): number {
     return 0;
   }
 
-  return Math.min(amount, MAX_CALCULATOR_AMOUNT);
+  return amount;
 }

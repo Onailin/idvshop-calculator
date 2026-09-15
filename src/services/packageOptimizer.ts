@@ -8,7 +8,6 @@ const MAX_COMBINATIONS = 50;
 const REQUIREMENT_CANDIDATE_LIMIT = 30;
 const FULL_ENUMERATION_MAX_BUTTONS = 2000;
 const FULL_ENUMERATION_MAX_BUDGET = 2000;
-const MAX_TOPUP_DP_TARGET = 100_000;
 
 type GenerateOptions = {
   minButtons?: number;
@@ -341,12 +340,7 @@ export function findTopTopupCombinations(
   groupName: string,
   limit: number = 3,
 ): PackageCombination[] {
-  if (
-    packages.length === 0 ||
-    requiredTopup <= 0 ||
-    limit <= 0 ||
-    requiredTopup > MAX_TOPUP_DP_TARGET
-  ) {
+  if (packages.length === 0 || requiredTopup <= 0 || limit <= 0) {
     return [];
   }
 
